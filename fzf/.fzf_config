@@ -1,0 +1,120 @@
+# =============================================================================
+# .fzf_config — Configuración personalizada de fzf
+# Sourced desde .zshrc después de ~/.fzf.zsh
+# Requiere: fzf, fd, bat
+# =============================================================================
+
+# -- Default command (usa fd en vez de find — más rápido y respeta .gitignore) -
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+
+# -- Opciones globales --------------------------------------------------------
+export FZF_DEFAULT_OPTS=" \
+  --height=60% \
+  --layout=reverse \
+  --info=inline \
+  --border \
+  --margin=1 \
+  --padding=1 \
+  --preview 'bat -n --color=always --line-range :300 {}' \
+  --preview-window='right:50%:wrap' \
+  --bind='ctrl-/:toggle-preview' \
+  --bind='ctrl-u:preview-half-page-up' \
+  --bind='ctrl-d:preview-half-page-down' \
+  --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+  --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+  --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+
+# -- CTRL-T: buscar archivos --------------------------------------------------
+export FZF_CTRL_T_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_OPTS=" \
+  --preview 'bat -n --color=always --line-range :300 {}' \
+  --bind 'enter:become(echo {})'"
+
+# -- ALT-C: cd a directorio ---------------------------------------------------
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -100'"
+
+# -- CTRL-R: historial (ya viene con fzf, solo mejoramos el preview) ----------
+export FZF_CTRL_R_OPTS=" \
+  --preview 'echo {}' \
+  --preview-window='up:3:wrap' \
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort' \
+  --header 'CTRL-Y para copiar al clipboard'"
+
+# -- Completion functions (tab completion) ------------------------------------
+
+# Usa fd para completar paths
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude .git . "$1"
+}
+
+# Usa fd para completar directorios
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude .git . "$1"
+}
+
+# Preview contextual por comando (SIN eval — seguro)
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'tree -C {} | head -100'   "$@" ;;
+    export|unset) fzf --preview "printenv {}"               "$@" ;;
+    ssh)          fzf --preview 'dig +short {}'             "$@" ;;
+    *)            fzf --preview 'bat -n --color=always {}' "$@" ;;
+  esac
+}
+
+# -- Funciones útiles ---------------------------------------------------------
+
+# Buscar archivo y abrirlo en el editor
+fe() {
+  local file
+  file=$(fd --type f --hidden --follow --exclude .git | fzf --preview 'bat -n --color=always {}')
+  [ -n "$file" ] && "${EDITOR:-vim}" "$file"
+}
+
+# Buscar directorio y hacer cd
+fcd() {
+  local dir
+  dir=$(fd --type d --hidden --follow --exclude .git | fzf --preview 'tree -C {} | head -100')
+  [ -n "$dir" ] && cd "$dir"
+}
+
+# Buscar en el contenido de archivos (requiere ripgrep)
+frg() {
+  local selected
+  selected=$(rg --color=always --line-number --no-heading --smart-case "${*:-}" |
+    fzf --ansi \
+        --delimiter : \
+        --preview 'bat -n --color=always --highlight-line {2} {1}' \
+        --preview-window='right:50%:+{2}-5')
+  if [ -n "$selected" ]; then
+    local file line
+    file=$(echo "$selected" | cut -d: -f1)
+    line=$(echo "$selected" | cut -d: -f2)
+    "${EDITOR:-vim}" "$file" +"$line"
+  fi
+}
+
+# Seleccionar branch de git
+fbr() {
+  local branch
+  branch=$(git branch --all --sort=-committerdate --format='%(refname:short)' |
+    fzf --preview 'git log --oneline --graph --color=always {} -- | head -20')
+  [ -n "$branch" ] && git checkout "$branch"
+}
+
+# Seleccionar proyecto y abrirlo en el editor
+fproject() {
+  local base_dir="${1:-$HOME/projects}"
+  if [ ! -d "$base_dir" ]; then
+    echo "Directorio no encontrado: $base_dir"
+    return 1
+  fi
+  local project
+  project=$(fd --type d --max-depth 2 --min-depth 1 . "$base_dir" |
+    fzf --preview 'tree -C -L 2 {} | head -50')
+  [ -n "$project" ] && cd "$project"
+}

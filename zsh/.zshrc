@@ -63,8 +63,9 @@ if [ -f "$HOME/.asdf/asdf.sh" ]; then
     autoload -Uz compinit && compinit
 fi
 
-# -- fzf (configuración detallada en módulo fzf) -----------------------------
+# -- fzf ----------------------------------------------------------------------
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf_config ] && source ~/.fzf_config
 
 # -- Antigravity IDE ----------------------------------------------------------
 if [ -d "$HOME/.antigravity" ]; then

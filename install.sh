@@ -29,7 +29,7 @@ declare_modules() {
     # estado: ready, coming
     MODULE_LIST=(
         "ghostty|Terminal (Ghostty)|ready"
-        "zsh|Shell (Zsh + Oh My Zsh)|coming"
+        "zsh|Shell (Zsh + Oh My Zsh)|ready"
         "git|Git (aliases, config)|coming"
         "fzf|fzf (búsqueda en terminal)|coming"
     )

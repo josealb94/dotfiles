@@ -1,0 +1,22 @@
+# =============================================================================
+# .zsh_aliases — Aliases públicos (no sensibles)
+# Managed by dotfiles: https://github.com/josealb94/dotfiles
+# =============================================================================
+
+# -- Git ----------------------------------------------------------------------
+alias gitlog='git log --all --graph --decorate --oneline'
+alias git-stats='git shortlog -sn --all --no-merges'
+
+# -- Dotfiles -----------------------------------------------------------------
+alias dotfiles='cd ~/dotfiles && ls -la'
+
+# -- General ------------------------------------------------------------------
+alias ll='ls -lah'
+alias la='ls -A'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# TODO: Revisar y migrar aliases útiles de ~/.my_config
+# - Aliases de docker (jg-docker-*)
+# - Aliases de navegación con fzf (projects, tutorials)
+# - Aliases de paths personalizados

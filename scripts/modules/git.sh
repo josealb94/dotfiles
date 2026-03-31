@@ -46,6 +46,143 @@ git_install_lfs() {
     print_success "Git LFS instalado y configurado"
 }
 
+# -- lazygit ------------------------------------------------------------------
+
+lazygit_get_version() {
+    if command_exists lazygit; then
+        lazygit --version 2>/dev/null | grep -o 'version=[0-9.]*' | head -1 | cut -d= -f2
+    fi
+}
+
+lazygit_check() {
+    local version
+    version=$(lazygit_get_version)
+    if [ -n "$version" ]; then
+        print_success "lazygit instalado (v${version})"
+        return 0
+    fi
+    return 1
+}
+
+lazygit_install() {
+    print_step "Instalando lazygit..."
+    case "$PKG_MANAGER" in
+        brew)
+            brew install lazygit
+            ;;
+        pacman)
+            sudo pacman -S --noconfirm lazygit
+            ;;
+        apt)
+            # lazygit no está en los repos oficiales de apt
+            # Instalar desde GitHub releases
+            lazygit_install_from_github
+            return $?
+            ;;
+        dnf)
+            sudo dnf copr enable -y atim/lazygit 2>/dev/null && \
+            sudo dnf install -y lazygit
+            ;;
+        *)
+            print_error "Instala lazygit manualmente: https://github.com/jesseduffield/lazygit#installation"
+            return 1
+            ;;
+    esac
+    print_success "lazygit instalado"
+}
+
+lazygit_install_from_github() {
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+
+    print_step "Descargando última versión desde GitHub..."
+    local latest_version
+    latest_version=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" 2>/dev/null \
+        | grep '"tag_name"' | head -1 | sed 's/.*"v\([^"]*\)".*/\1/')
+
+    if [ -z "$latest_version" ]; then
+        print_error "No se pudo obtener la última versión"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    local arch_name
+    case "$(uname -m)" in
+        x86_64)  arch_name="Linux_x86_64" ;;
+        aarch64) arch_name="Linux_arm64" ;;
+        arm64)   arch_name="Linux_arm64" ;;
+        *)       print_error "Arquitectura no soportada: $(uname -m)"; rm -rf "$tmp_dir"; return 1 ;;
+    esac
+
+    local url="https://github.com/jesseduffield/lazygit/releases/download/v${latest_version}/lazygit_${latest_version}_${arch_name}.tar.gz"
+    print_step "Descargando v${latest_version}..."
+
+    if curl -fsSL "$url" -o "$tmp_dir/lazygit.tar.gz"; then
+        tar -xzf "$tmp_dir/lazygit.tar.gz" -C "$tmp_dir"
+        sudo install "$tmp_dir/lazygit" /usr/local/bin/lazygit
+        print_success "lazygit v${latest_version} instalado"
+    else
+        print_error "Error descargando lazygit"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    rm -rf "$tmp_dir"
+}
+
+lazygit_update() {
+    print_step "Actualizando lazygit..."
+    case "$PKG_MANAGER" in
+        brew)
+            local output
+            output=$(brew upgrade lazygit 2>&1)
+            if echo "$output" | grep -q "already installed"; then
+                print_info "Ya tienes la última versión"
+            else
+                print_success "lazygit actualizado"
+            fi
+            ;;
+        pacman)
+            sudo pacman -Syu --noconfirm lazygit
+            print_success "lazygit actualizado"
+            ;;
+        apt)
+            lazygit_install_from_github
+            ;;
+        dnf)
+            sudo dnf upgrade -y lazygit
+            print_success "lazygit actualizado"
+            ;;
+    esac
+}
+
+lazygit_main() {
+    echo ""
+    print_section "lazygit (TUI para Git)"
+    echo ""
+
+    if lazygit_check; then
+        echo ""
+        echo -e "    ${BOLD}u${NC}) Actualizar"
+        echo -e "    ${BOLD}s${NC}) Saltar"
+        echo ""
+        local action
+        print_prompt "Opción"
+        read -r action
+
+        case "$action" in
+            u|U) lazygit_update ;;
+            s|S) print_info "Saltando lazygit" ;;
+            *)   print_error "Opción no válida" ;;
+        esac
+    else
+        if confirm "¿Instalar lazygit?"; then
+            lazygit_install
+        fi
+    fi
+}
+
+# -- git config ---------------------------------------------------------------
+
 git_show_current_config() {
     echo ""
     print_section "Configuración actual"
@@ -136,10 +273,13 @@ git_main() {
         fi
     fi
 
-    # 3. Mostrar config actual
+    # 3. lazygit
+    lazygit_main
+
+    # 4. Mostrar config actual
     git_show_current_config
 
-    # 4. Aplicar configuración
+    # 5. Aplicar configuración
     echo ""
     print_section "Aplicar configuración"
     echo ""
@@ -155,7 +295,7 @@ git_main() {
         return 0
     fi
 
-    # 5. Config local
+    # 6. Config local
     git_setup_local_config
 
     echo ""

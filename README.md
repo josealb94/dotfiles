@@ -20,14 +20,16 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 |---|---|---|
 | **Ghostty** | Terminal GPU — install, config, Nerd Font | ✅ |
 | **Zsh** | Oh My Zsh + Spaceship + plugins + asdf | ✅ |
-| **Git** | Aliases, config portabilizada | 🔲 |
-| **fzf** | Búsqueda en terminal | 🔲 |
+| **Git** | Aliases, config portabilizada, gitignore global | ✅ |
+| **fzf** | Búsqueda fuzzy + fd, bat, ripgrep | ✅ |
 
 ### Ejecutar un módulo específico
 
 ```bash
 ./install.sh ghostty    # Solo Ghostty
 ./install.sh zsh        # Solo Zsh
+./install.sh git        # Solo Git
+./install.sh fzf        # Solo fzf
 ```
 
 ## Estructura
@@ -40,13 +42,20 @@ dotfiles/
 │   ├── utils.sh                  # OS detection, colores, stow, fonts
 │   └── modules/
 │       ├── ghostty.sh            # Módulo Ghostty
-│       └── zsh.sh                # Módulo Zsh
+│       ├── zsh.sh                # Módulo Zsh
+│       ├── git.sh                # Módulo Git
+│       └── fzf.sh                # Módulo fzf
 ├── ghostty/                      # Paquete Stow → ~/.config/ghostty/
 │   └── .config/ghostty/config
-└── zsh/                          # Paquete Stow → ~/.zshrc, ~/.zshenv, etc.
-    ├── .zshrc
-    ├── .zshenv
-    └── .zsh_aliases
+├── zsh/                          # Paquete Stow → ~/.zshrc, ~/.zshenv, etc.
+│   ├── .zshrc
+│   ├── .zshenv
+│   └── .zsh_aliases
+├── git/                          # Paquete Stow → ~/.gitconfig, etc.
+│   ├── .gitconfig
+│   └── .gitignore_global
+└── fzf/                          # Paquete Stow → ~/.fzf_config
+    └── .fzf_config
 ```
 
 Cada carpeta de primer nivel (excepto `scripts/`) es un **paquete [GNU Stow](https://www.gnu.org/software/stow/)**. Su estructura interna replica `~/`, y stow crea symlinks automáticamente.
@@ -59,6 +68,100 @@ Cada carpeta de primer nivel (excepto `scripts/`) es un **paquete [GNU Stow](htt
 ```
 
 Editás el archivo en el repo, el symlink lo refleja al instante. Solo necesitás commitear y pushear.
+
+---
+
+## Referencia rápida
+
+### Ghostty — Keybindings
+
+| Acción | Atajo |
+|---|---|
+| Split vertical | `Cmd+D` |
+| Split horizontal | `Cmd+Shift+D` |
+| Zoom split | `Cmd+Shift+Enter` |
+| Navegar splits | `Cmd+Alt+←↑↓→` |
+| Redimensionar splits | `Cmd+Ctrl+←↑↓→` |
+| Nueva tab | `Cmd+T` |
+| Cerrar tab/split | `Cmd+W` |
+| Recargar config | `Cmd+Shift+,` |
+| Abrir config | `Cmd+,` |
+
+### fzf — Keybindings de terminal
+
+| Atajo | Acción |
+|---|---|
+| `Ctrl+T` | Buscar archivo e insertar path en la línea actual |
+| `Ctrl+R` | Buscar en el historial de comandos |
+| `Alt+C` | Buscar directorio y hacer `cd` (requiere `macos-option-as-alt`) |
+| `Ctrl+/` | Toggle del panel de preview (dentro de fzf) |
+| `Ctrl+U/D` | Scroll en el panel de preview |
+
+### fzf — Funciones custom
+
+| Comando | Descripción |
+|---|---|
+| `fe` | Buscar archivo y abrirlo en el editor |
+| `fcd` | Buscar directorio y hacer `cd` |
+| `frg <texto>` | Buscar contenido en archivos con ripgrep → abrir en editor en la línea exacta |
+| `fbr` | Seleccionar branch de git interactivamente y hacer checkout |
+| `fproject [dir]` | Seleccionar proyecto y hacer `cd` (default: `~/projects`) |
+
+### fzf — Tab completion mejorada
+
+fzf mejora el autocompletado nativo de zsh. Escribí un comando y presioná `Tab`:
+
+```bash
+cd **<Tab>        # Busca directorios con fzf + preview de tree
+vim **<Tab>       # Busca archivos con fzf + preview de bat
+ssh **<Tab>       # Busca hosts con fzf + preview de dig
+export **<Tab>    # Busca variables de entorno con fzf + preview de valor
+kill **<Tab>      # Busca procesos con fzf
+```
+
+### Git — Aliases
+
+| Alias | Comando completo | Descripción |
+|---|---|---|
+| `git lg` | `log --all --graph --decorate --oneline` | Log compacto con grafo |
+| `git lga` | `log --graph --abbrev-commit --decorate --format=...` | Log detallado con colores |
+| `git last` | `log -1 --stat` | Último commit con archivos cambiados |
+| `git s` | `status -s -b` | Status corto con branch |
+| `git br` | `branch --sort=-committerdate --format=...` | Branches ordenadas por fecha |
+| `git cleanup` | `branch --merged main \| ... \| xargs git branch -d` | Eliminar branches mergeadas |
+| `git d` | `diff` | Diff |
+| `git ds` | `diff --staged` | Diff de staged |
+| `git dw` | `diff --word-diff` | Diff palabra por palabra |
+| `git co` | `checkout` | Checkout |
+| `git cm` | `commit -m` | Commit con mensaje |
+| `git ca` | `commit --amend --no-edit` | Amend sin cambiar mensaje |
+| `git unstage` | `restore --staged` | Quitar del staging |
+| `git undo` | `reset --soft HEAD~1` | Deshacer último commit (mantiene cambios) |
+
+### Git — Defaults configurados
+
+| Setting | Valor | Descripción |
+|---|---|---|
+| `pull.rebase` | `true` | Pull con rebase en vez de merge |
+| `push.autoSetupRemote` | `true` | Push auto-configura tracking del branch remoto |
+| `fetch.prune` | `true` | Fetch limpia branches remotas eliminadas |
+| `merge.conflictstyle` | `diff3` | Muestra base común en conflictos de merge |
+| `rerere.enabled` | `true` | Recuerda resoluciones de conflictos anteriores |
+| `url.ssh://git@github.com/` | `insteadOf https://github.com/` | Fuerza SSH para GitHub |
+
+### Zsh — Aliases generales
+
+| Alias | Descripción |
+|---|---|
+| `gitlog` | `git log --all --graph --decorate --oneline` |
+| `git-stats` | Muestra contribuidores por número de commits |
+| `dotfiles` | `cd ~/dotfiles && ls -la` |
+| `ll` | `ls -lah` |
+| `la` | `ls -A` |
+| `..` | `cd ..` |
+| `...` | `cd ../..` |
+
+---
 
 ## Plataformas soportadas
 
@@ -116,6 +219,6 @@ MODULE_LIST=(
 
 ## Dependencias
 
-- [GNU Stow](https://www.gnu.org/software/stow/) — el instalador lo instala automáticamente si no lo tenés
+- [GNU Stow](https://www.gnu.org/software/stow/) — el instalador lo instala automáticamente
 - [Git](https://git-scm.com/)
 - Un package manager: Homebrew (macOS), apt, pacman, o dnf (Linux)

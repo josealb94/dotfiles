@@ -20,7 +20,7 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 |---|---|---|
 | **Ghostty** | Terminal GPU — install, config, Nerd Font | ✅ |
 | **Zsh** | Oh My Zsh + Spaceship + plugins + asdf | ✅ |
-| **Git** | Aliases, config portabilizada, gitignore global | ✅ |
+| **Git** | Aliases, config portabilizada, gitignore global, lazygit | ✅ |
 | **fzf** | Búsqueda fuzzy + fd, bat, ripgrep | ✅ |
 
 ### Ejecutar un módulo específico
@@ -118,6 +118,26 @@ ssh **<Tab>       # Busca hosts con fzf + preview de dig
 export **<Tab>    # Busca variables de entorno con fzf + preview de valor
 kill **<Tab>      # Busca procesos con fzf
 ```
+
+### lazygit
+
+TUI interactiva para Git. Se instala/actualiza desde el módulo git.
+
+```bash
+lazygit    # Abrir en el repo actual
+```
+
+| Atajo (dentro de lazygit) | Acción |
+|---|---|
+| `Space` | Stage/unstage archivo |
+| `c` | Commit |
+| `p` | Push |
+| `P` | Pull |
+| `b` | Branches |
+| `s` | Stash |
+| `[` / `]` | Navegar entre paneles |
+| `?` | Ver todos los keybindings |
+| `q` | Salir |
 
 ### Git — Aliases
 

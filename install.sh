@@ -30,7 +30,7 @@ declare_modules() {
     MODULE_LIST=(
         "ghostty|Terminal (Ghostty)|ready"
         "zsh|Shell (Zsh + Oh My Zsh)|ready"
-        "git|Git (aliases, config)|coming"
+        "git|Git (aliases, config)|ready"
         "fzf|fzf (búsqueda en terminal)|coming"
     )
 }

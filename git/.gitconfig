@@ -1,0 +1,73 @@
+[user]
+	name = Jose Gallegos
+	email = josealb94@gmail.com
+
+[init]
+	defaultBranch = main
+
+[core]
+	excludesfile = ~/.gitignore_global
+	editor = vim
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[fetch]
+	prune = true
+
+[diff]
+	colorMoved = default
+
+[merge]
+	conflictstyle = diff3
+
+[rerere]
+	enabled = true
+
+# -- Aliases ------------------------------------------------------------------
+[alias]
+	# Log
+	lg = log --all --graph --decorate --oneline
+	lga = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	last = log -1 --stat
+
+	# Status
+	s = status -s -b
+
+	# Branches
+	br = branch --sort=-committerdate --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:green)%(committerdate:relative)%(color:reset) - %(contents:subject)'
+	cleanup = !git branch --merged main | grep -v 'main' | xargs -r git branch -d
+
+	# Diff
+	d = diff
+	ds = diff --staged
+	dw = diff --word-diff
+
+	# Quick actions
+	co = checkout
+	cm = commit -m
+	ca = commit --amend --no-edit
+	unstage = restore --staged
+	undo = reset --soft HEAD~1
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
+
+# -- Overrides locales --------------------------------------------------------
+# Incluir config local para overrides por máquina (email corporativo, signing, etc.)
+# Este archivo no se versiona — vive en el repo privado o se crea manualmente
+[include]
+	path = ~/.gitconfig.local
+
+# Ejemplo de conditional include para repos de trabajo:
+# [includeIf "gitdir:~/work/"]
+# 	path = ~/.gitconfig.work

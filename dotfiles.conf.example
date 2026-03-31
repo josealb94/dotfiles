@@ -1,0 +1,12 @@
+# =============================================================================
+# dotfiles.conf — Configuración local del instalador
+#
+# Copia este archivo como dotfiles.conf y ajusta los valores:
+#   cp dotfiles.conf.example dotfiles.conf
+#
+# Este archivo está en .gitignore — no se sube al repositorio.
+# =============================================================================
+
+# Ruta al repositorio privado de dotfiles (secrets, SSH hosts, etc.)
+# Puedes usar cualquier ruta; el script buscará archivos de configuración aquí.
+DOTFILES_PRIVATE_DIR="$HOME/dotfiles-private"

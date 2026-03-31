@@ -1,0 +1,8 @@
+# Configuración local (contiene paths al repo privado)
+dotfiles.conf
+
+# macOS
+.DS_Store
+
+# Backups generados por el instalador
+*.bak

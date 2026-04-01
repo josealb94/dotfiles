@@ -6,17 +6,30 @@
 # -- Git ----------------------------------------------------------------------
 alias gitlog='git log --all --graph --decorate --oneline'
 alias git-stats='git shortlog -sn --all --no-merges'
+alias lg='lazygit'
 
 # -- Dotfiles -----------------------------------------------------------------
 alias dotfiles='cd ~/dotfiles && ls -la'
 
-# -- General ------------------------------------------------------------------
-alias ll='ls -lah'
-alias la='ls -A'
+# -- Navegación ---------------------------------------------------------------
 alias ..='cd ..'
 alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# -- zoxide (si está instalado, z reemplaza cd para directorios frecuentes) ---
+# Uso: z projects  → salta a ~/projects (o el match más frecuente)
+#      zi          → búsqueda interactiva con fzf
+
+# -- Utilidades ---------------------------------------------------------------
+alias reload='source ~/.zshrc'
+alias path='echo $PATH | tr ":" "\n"'
+alias ports='lsof -i -P -n | grep LISTEN'
+alias myip='curl -s ifconfig.me'
+alias weather='curl -s wttr.in/?format=3'
+
+# -- Procesos -----------------------------------------------------------------
+alias psg='ps aux | grep -v grep | grep'
 
 # TODO: Revisar y migrar aliases útiles de ~/.my_config
 # - Aliases de docker (jg-docker-*)
-# - Aliases de navegación con fzf (projects, tutorials)
 # - Aliases de paths personalizados

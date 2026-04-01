@@ -15,14 +15,39 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="spaceship"
 
+# fzf-tab debe cargarse ANTES de compinit (que corre dentro de Oh My Zsh)
+# zsh-completions agrega completions adicionales al fpath
+if [ -d "${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src" ]; then
+    fpath+=${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src
+fi
+
 plugins=(
     git
     colored-man-pages
     zsh-autosuggestions
     zsh-syntax-highlighting
+    zsh-history-substring-search
+    you-should-use
+    fzf-tab
+    direnv
 )
 
 source "$ZSH/oh-my-zsh.sh"
+
+# -- fzf-tab config (después de Oh My Zsh) -----------------------------------
+# Preview en el autocompletado con tab
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'tree -C $realpath | head -50'
+zstyle ':fzf-tab:complete:ls:*' fzf-preview 'tree -C $realpath | head -50'
+zstyle ':fzf-tab:complete:cat:*' fzf-preview 'bat -n --color=always $realpath 2>/dev/null || cat $realpath'
+zstyle ':fzf-tab:complete:vim:*' fzf-preview 'bat -n --color=always $realpath 2>/dev/null'
+zstyle ':fzf-tab:complete:nvim:*' fzf-preview 'bat -n --color=always $realpath 2>/dev/null'
+# Colores consistentes con Catppuccin
+zstyle ':fzf-tab:*' fzf-flags --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8
+
+# -- history-substring-search (después de Oh My Zsh) --------------------------
+# Usar ↑↓ para buscar en historial por lo que ya escribiste
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 
 # -- Go -----------------------------------------------------------------------
 export GOPATH="$HOME/go"
@@ -56,7 +81,6 @@ export GEM_PATH="$HOME/.gem"
 # -- asdf (version manager: nodejs, golang, ruby, rust, java, ...) -----------
 if [ -f "$HOME/.asdf/asdf.sh" ]; then
     . "$HOME/.asdf/asdf.sh"
-    # Completions
     if [ -d "${ASDF_DIR}/completions" ]; then
         fpath=(${ASDF_DIR}/completions $fpath)
     fi
@@ -66,6 +90,25 @@ fi
 # -- fzf ----------------------------------------------------------------------
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [ -f ~/.fzf_config ] && source ~/.fzf_config
+
+# -- zoxide (cd inteligente — aprende tus directorios frecuentes) -------------
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
+
+# -- eza (ls moderno con iconos y git status) ---------------------------------
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza -la --icons --group-directories-first --git'
+    alias la='eza -a --icons --group-directories-first'
+    alias lt='eza --tree --level=2 --icons --group-directories-first'
+fi
+
+# -- bat (cat mejorado con syntax highlighting) -------------------------------
+if command -v bat >/dev/null 2>&1; then
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    alias cat='bat --paging=never'
+fi
 
 # -- Antigravity IDE ----------------------------------------------------------
 if [ -d "$HOME/.antigravity" ]; then
@@ -81,7 +124,6 @@ fi
 [ -f "$HOME/.zsh_aliases" ] && source "$HOME/.zsh_aliases"
 
 # -- Configuración privada (secrets, SSH hosts, etc.) -------------------------
-# Ruta configurable via dotfiles.conf → DOTFILES_PRIVATE_DIR
 export DOTFILES_PRIVATE_DIR="${DOTFILES_PRIVATE_DIR:-$HOME/dotfiles-private}"
 if [ -d "$DOTFILES_PRIVATE_DIR" ]; then
     for f in "$DOTFILES_PRIVATE_DIR"/.zsh_*; do

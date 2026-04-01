@@ -68,6 +68,58 @@ zsh_install_plugins() {
         "https://github.com/zsh-users/zsh-autosuggestions.git"
     zsh_install_plugin "zsh-syntax-highlighting" \
         "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+    zsh_install_plugin "zsh-completions" \
+        "https://github.com/zsh-users/zsh-completions.git"
+    zsh_install_plugin "zsh-history-substring-search" \
+        "https://github.com/zsh-users/zsh-history-substring-search.git"
+    zsh_install_plugin "you-should-use" \
+        "https://github.com/MichaelAqworter/zsh-you-should-use.git"
+    zsh_install_plugin "fzf-tab" \
+        "https://github.com/Aloxaf/fzf-tab.git"
+}
+
+# -- Herramientas CLI ---------------------------------------------------------
+
+zsh_check_cli_tools() {
+    echo ""
+    print_section "Herramientas CLI de productividad"
+    echo ""
+
+    local missing=""
+
+    if command_exists zoxide; then
+        print_success "zoxide (cd inteligente)"
+    else
+        missing="$missing zoxide"
+    fi
+
+    if command_exists eza; then
+        print_success "eza (ls moderno con iconos y git)"
+    else
+        missing="$missing eza"
+    fi
+
+    if command_exists direnv; then
+        print_success "direnv (env vars por directorio)"
+    else
+        missing="$missing direnv"
+    fi
+
+    if [ -n "$missing" ]; then
+        echo ""
+        if confirm "¿Instalar herramientas faltantes?${missing}"; then
+            for tool in $missing; do
+                print_step "Instalando ${tool}..."
+                case "$PKG_MANAGER" in
+                    brew)   brew install "$tool" ;;
+                    apt)    sudo apt-get install -y "$tool" ;;
+                    pacman) sudo pacman -S --noconfirm "$tool" ;;
+                    dnf)    sudo dnf install -y "$tool" ;;
+                esac
+            done
+            print_success "Herramientas instaladas"
+        fi
+    fi
 }
 
 # -- Tema ---------------------------------------------------------------------
@@ -213,10 +265,13 @@ zsh_main() {
     # Configurar Node.js via asdf
     zsh_setup_asdf_nodejs
 
-    # 6. Detectar nvm residual
+    # 6. Herramientas CLI
+    zsh_check_cli_tools
+
+    # 7. Detectar nvm residual
     zsh_check_nvm
 
-    # 7. Aplicar configuración
+    # 8. Aplicar configuración
     echo ""
     print_section "Aplicar configuración"
     echo ""

@@ -42,7 +42,7 @@ scrollback-limit = 50000
 
 # -- Splits — indicador visual de sección activa -----------------------------
 # Los splits inactivos se atenúan para que sea obvio cuál es el activo
-unfocused-split-opacity = 0.85
+unfocused-split-opacity = 0.55
 
 # -- Keybindings --------------------------------------------------------------
 # Splits

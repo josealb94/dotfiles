@@ -15,6 +15,18 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="spaceship"
 
+# -- Spaceship: línea de color como indicador de split activo -----------------
+SPACESHIP_PROMPT_ADD_NEWLINE=true
+SPACESHIP_PROMPT_SEPARATE_LINE=true
+# Línea horizontal de color al inicio del prompt
+SPACESHIP_PROMPT_PREFIXES_SHOW=true
+SPACESHIP_CHAR_SYMBOL="→ "
+SPACESHIP_CHAR_COLOR_SUCCESS="cyan"
+SPACESHIP_CHAR_COLOR_FAILURE="red"
+# Mostrar tiempo de ejecución si el comando tardó más de 3 segundos
+SPACESHIP_EXEC_TIME_SHOW=true
+SPACESHIP_EXEC_TIME_ELAPSED=3
+
 # fzf-tab debe cargarse ANTES de compinit (que corre dentro de Oh My Zsh)
 # zsh-completions agrega completions adicionales al fpath
 if [ -d "${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src" ]; then
@@ -32,7 +44,35 @@ plugins=(
     direnv
 )
 
+# -- Corrección de typos en comandos ------------------------------------------
+ENABLE_CORRECTION="true"
+
 source "$ZSH/oh-my-zsh.sh"
+
+# -- Historial compartido entre tabs/splits -----------------------------------
+setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+HISTSIZE=50000
+SAVEHIST=50000
+
+# -- Línea separadora de color (indicador visual de split activo) -------------
+_prompt_separator() {
+    local cols=${COLUMNS:-80}
+    printf '\033[36m%*s\033[0m\n' "$cols" '' | tr ' ' '─'
+}
+precmd_functions+=(_prompt_separator)
+
+# -- Autocompletado mejorado --------------------------------------------------
+# Case-insensitive: cd doc<Tab> encuentra Documents
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+# Completar desde ambos extremos
+zstyle ':completion:*' menu select
+# Colores en completado
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 # -- fzf-tab config (después de Oh My Zsh) -----------------------------------
 # Preview en el autocompletado con tab

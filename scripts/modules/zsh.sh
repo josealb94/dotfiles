@@ -73,7 +73,7 @@ zsh_install_plugins() {
     zsh_install_plugin "zsh-history-substring-search" \
         "https://github.com/zsh-users/zsh-history-substring-search.git"
     zsh_install_plugin "you-should-use" \
-        "https://github.com/MichaelAqworter/zsh-you-should-use.git"
+        "https://github.com/MichaelAquilina/zsh-you-should-use.git"
     zsh_install_plugin "fzf-tab" \
         "https://github.com/Aloxaf/fzf-tab.git"
 }

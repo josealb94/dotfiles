@@ -32,6 +32,7 @@ declare_modules() {
         "zsh|Shell (Zsh + Oh My Zsh)|ready"
         "git|Git (aliases, config)|ready"
         "fzf|fzf (búsqueda en terminal)|ready"
+        "nvim|Neovim + LazyVim (editor)|ready"
     )
 }
 

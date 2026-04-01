@@ -1,0 +1,137 @@
+# =============================================================================
+# Starship — Configuración del prompt
+# Docs: https://starship.rs/config/
+# =============================================================================
+
+# Esquema general del prompt
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$golang\
+$python\
+$rust\
+$java\
+$docker_context\
+$aws\
+$package\
+$cmd_duration\
+$line_break\
+$character"""
+
+# Segundo de espera antes de chequear archivos (performance)
+scan_timeout = 30
+command_timeout = 500
+
+# -- Paleta Catppuccin Mocha --------------------------------------------------
+palette = "catppuccin_mocha"
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+overlay0 = "#6c7086"
+base = "#1e1e2e"
+
+# -- Prompt character ---------------------------------------------------------
+[character]
+success_symbol = "[→](bold teal)"
+error_symbol = "[→](bold red)"
+
+# -- Directorio ---------------------------------------------------------------
+[directory]
+style = "bold blue"
+truncation_length = 3
+truncate_to_repo = true
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+# -- Git ----------------------------------------------------------------------
+[git_branch]
+style = "bold mauve"
+format = "on [$symbol$branch]($style) "
+symbol = " "
+
+[git_status]
+style = "bold red"
+format = '([$all_status$ahead_behind]($style) )'
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?${count}"
+stashed = "\\$${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+# -- Lenguajes ----------------------------------------------------------------
+[nodejs]
+style = "bold green"
+format = "via [$symbol($version)]($style) "
+symbol = " "
+detect_files = ["package.json", ".node-version", ".nvmrc"]
+detect_folders = ["node_modules"]
+
+[golang]
+style = "bold sky"
+format = "via [$symbol($version)]($style) "
+symbol = " "
+
+[python]
+style = "bold yellow"
+format = "via [$symbol($version)]($style) "
+symbol = " "
+
+[rust]
+style = "bold peach"
+format = "via [$symbol($version)]($style) "
+symbol = " "
+
+[java]
+style = "bold red"
+format = "via [$symbol($version)]($style) "
+symbol = " "
+
+# -- Docker -------------------------------------------------------------------
+[docker_context]
+style = "bold sapphire"
+format = "via [$symbol$context]($style) "
+symbol = " "
+only_with_files = true
+
+# -- AWS ----------------------------------------------------------------------
+[aws]
+style = "bold peach"
+format = "on [$symbol($profile)(\\($region\\))]($style) "
+symbol = " "
+
+# -- Package ------------------------------------------------------------------
+[package]
+style = "bold peach"
+format = "is [$symbol$version]($style) "
+symbol = "📦 "
+
+# -- Tiempo de ejecución ------------------------------------------------------
+[cmd_duration]
+style = "bold yellow"
+format = "took [$duration]($style) "
+min_time = 3000
+
+# -- Módulos desactivados (no necesarios) -------------------------------------
+[battery]
+disabled = true

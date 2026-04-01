@@ -129,18 +129,35 @@ zsh_check_spaceship() {
     [ -f "$ZSH_CUSTOM_DIR/themes/spaceship.zsh-theme" ]
 }
 
-zsh_install_spaceship() {
-    if zsh_check_spaceship; then
-        print_success "Tema: Spaceship"
+zsh_check_starship() {
+    if command_exists starship; then
+        local version
+        version=$(starship --version 2>/dev/null | head -1 | awk '{print $2}')
+        print_success "Starship instalado (v${version})"
         return 0
     fi
+    return 1
+}
 
-    print_step "Instalando tema Spaceship..."
-    git clone --depth=1 https://github.com/spaceship-prompt/spaceship-prompt.git \
-        "$ZSH_CUSTOM_DIR/themes/spaceship-prompt" 2>/dev/null
-    ln -sf "$ZSH_CUSTOM_DIR/themes/spaceship-prompt/spaceship.zsh-theme" \
-        "$ZSH_CUSTOM_DIR/themes/spaceship.zsh-theme"
-    print_success "Tema: Spaceship instalado"
+zsh_install_starship() {
+    print_step "Instalando Starship..."
+    case "$PKG_MANAGER" in
+        brew)   brew install starship ;;
+        pacman) sudo pacman -S --noconfirm starship ;;
+        apt)
+            curl -sS https://starship.rs/install.sh | sh -s -- --yes
+            ;;
+        dnf)    sudo dnf install -y starship ;;
+        *)
+            curl -sS https://starship.rs/install.sh | sh -s -- --yes
+            ;;
+    esac
+    print_success "Starship instalado"
+}
+
+zsh_configure_starship() {
+    apply_stow "starship" || return 1
+    print_success "Configuración de Starship aplicada"
 }
 
 # -- asdf ---------------------------------------------------------------------
@@ -247,11 +264,16 @@ zsh_main() {
     echo ""
     zsh_install_plugins
 
-    # 4. Tema
+    # 4. Prompt (Starship)
     echo ""
-    print_section "Tema"
+    print_section "Prompt (Starship)"
     echo ""
-    zsh_install_spaceship
+    if ! zsh_check_starship; then
+        if confirm "¿Instalar Starship?"; then
+            zsh_install_starship
+        fi
+    fi
+    zsh_configure_starship
 
     # 5. asdf
     echo ""

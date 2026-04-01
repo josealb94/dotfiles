@@ -13,19 +13,8 @@ fi
 
 # -- Oh My Zsh ----------------------------------------------------------------
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="spaceship"
-
-# -- Spaceship: línea de color como indicador de split activo -----------------
-SPACESHIP_PROMPT_ADD_NEWLINE=true
-SPACESHIP_PROMPT_SEPARATE_LINE=true
-# Línea horizontal de color al inicio del prompt
-SPACESHIP_PROMPT_PREFIXES_SHOW=true
-SPACESHIP_CHAR_SYMBOL="→ "
-SPACESHIP_CHAR_COLOR_SUCCESS="cyan"
-SPACESHIP_CHAR_COLOR_FAILURE="red"
-# Mostrar tiempo de ejecución si el comando tardó más de 3 segundos
-SPACESHIP_EXEC_TIME_SHOW=true
-SPACESHIP_EXEC_TIME_ELAPSED=3
+# Tema desactivado — Starship maneja el prompt
+ZSH_THEME=""
 
 # fzf-tab debe cargarse ANTES de compinit (que corre dentro de Oh My Zsh)
 # zsh-completions agrega completions adicionales al fpath
@@ -169,4 +158,9 @@ if [ -d "$DOTFILES_PRIVATE_DIR" ]; then
     for f in "$DOTFILES_PRIVATE_DIR"/.zsh_*; do
         [ -f "$f" ] && source "$f"
     done
+fi
+
+# -- Starship prompt (debe ir al final) --------------------------------------
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
 fi

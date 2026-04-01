@@ -49,8 +49,8 @@ base = "#1e1e2e"
 
 # -- Prompt character ---------------------------------------------------------
 [character]
-success_symbol = "[→](bold teal)"
-error_symbol = "[→](bold red)"
+success_symbol = "[➜](bold teal)"
+error_symbol = "[➜](bold red)"
 
 # -- Directorio ---------------------------------------------------------------
 [directory]
@@ -63,7 +63,7 @@ format = "[$path]($style)[$read_only]($read_only_style) "
 [git_branch]
 style = "bold mauve"
 format = "on [$symbol$branch]($style) "
-symbol = " "
+symbol = "🔀 "
 
 [git_status]
 style = "bold red"
@@ -82,49 +82,41 @@ deleted = "✘${count}"
 # -- Lenguajes ----------------------------------------------------------------
 [nodejs]
 style = "bold green"
-format = "via [$symbol($version)]($style) "
-symbol = " "
+format = "via [⬢ $version]($style) "
 detect_files = ["package.json", ".node-version", ".nvmrc"]
 detect_folders = ["node_modules"]
 
 [golang]
 style = "bold sky"
-format = "via [$symbol($version)]($style) "
-symbol = " "
+format = "via [🐹 $version]($style) "
 
 [python]
 style = "bold yellow"
-format = "via [$symbol($version)]($style) "
-symbol = " "
+format = "via [🐍 $version]($style) "
 
 [rust]
 style = "bold peach"
-format = "via [$symbol($version)]($style) "
-symbol = " "
+format = "via [🦀 $version]($style) "
 
 [java]
 style = "bold red"
-format = "via [$symbol($version)]($style) "
-symbol = " "
+format = "via [☕ $version]($style) "
 
 # -- Docker -------------------------------------------------------------------
 [docker_context]
 style = "bold sapphire"
-format = "via [$symbol$context]($style) "
-symbol = " "
+format = "via [🐳 $context]($style) "
 only_with_files = true
 
 # -- AWS ----------------------------------------------------------------------
 [aws]
 style = "bold peach"
-format = "on [$symbol($profile)(\\($region\\))]($style) "
-symbol = " "
+format = "on [☁️  $profile($region)]($style) "
 
 # -- Package ------------------------------------------------------------------
 [package]
 style = "bold peach"
-format = "is [$symbol$version]($style) "
-symbol = "📦 "
+format = "is [📦 $version]($style) "
 
 # -- Tiempo de ejecución ------------------------------------------------------
 [cmd_duration]

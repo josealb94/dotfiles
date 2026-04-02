@@ -169,17 +169,44 @@ lazygit    # Abrir en el repo actual
 | `rerere.enabled` | `true` | Recuerda resoluciones de conflictos anteriores |
 | `url.ssh://git@github.com/` | `insteadOf https://github.com/` | Fuerza SSH para GitHub |
 
+### tmux — Claude Code worktrees en background
+
+tmux permite ejecutar tareas de Claude Code en background con worktrees aislados:
+
+```bash
+# Lanzar tarea en background
+claude --worktree mi-tarea --tmux "implementa autenticación con JWT"
+
+# Ver/interactuar con la tarea
+tmux attach -t mi-tarea     # o: ta mi-tarea
+
+# Volver a tu terminal (Claude sigue trabajando)
+Ctrl+B, luego D
+
+# Ver sesiones activas
+tmux ls                     # o: tls
+
+# Cerrar sesión terminada
+tmux kill-session -t nombre # o: tk nombre
+```
+
 ### Zsh — Aliases generales
 
 | Alias | Descripción |
 |---|---|
 | `gitlog` | `git log --all --graph --decorate --oneline` |
 | `git-stats` | Muestra contribuidores por número de commits |
+| `lg` | Abre lazygit |
 | `dotfiles` | `cd ~/dotfiles && ls -la` |
-| `ll` | `ls -lah` |
-| `la` | `ls -A` |
-| `..` | `cd ..` |
-| `...` | `cd ../..` |
+| `reload` | `source ~/.zshrc` |
+| `ll` | Lista detallada con iconos y git status (eza) |
+| `lt` | Vista de árbol 2 niveles (eza) |
+| `..` / `...` / `....` | Subir 1, 2, 3 niveles |
+| `tls` | `tmux ls` — listar sesiones |
+| `ta <nombre>` | `tmux attach -t` — conectar a sesión |
+| `tk <nombre>` | `tmux kill-session -t` — cerrar sesión |
+| `ports` | Mostrar puertos en uso |
+| `psg <nombre>` | Buscar proceso por nombre |
 
 ---
 

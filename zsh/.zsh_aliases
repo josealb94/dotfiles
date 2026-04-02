@@ -27,6 +27,11 @@ alias ports='lsof -i -P -n | grep LISTEN'
 alias myip='curl -s ifconfig.me'
 alias weather='curl -s wttr.in/?format=3'
 
+# -- tmux (para Claude Code worktrees en background) -------------------------
+alias tls='tmux ls'
+alias ta='tmux attach -t'
+alias tk='tmux kill-session -t'
+
 # -- Procesos -----------------------------------------------------------------
 alias psg='ps aux | grep -v grep | grep'
 

@@ -87,6 +87,12 @@ zsh_check_cli_tools() {
 
     local missing=""
 
+    if command_exists tmux; then
+        print_success "tmux (sesiones background para Claude Code worktrees)"
+    else
+        missing="$missing tmux"
+    fi
+
     if command_exists zoxide; then
         print_success "zoxide (cd inteligente)"
     else

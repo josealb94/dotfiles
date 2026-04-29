@@ -33,6 +33,7 @@ declare_modules() {
         "git|Git (aliases, config)|ready"
         "fzf|fzf (búsqueda en terminal)|ready"
         "nvim|Neovim + LazyVim (editor)|ready"
+        "apps|Apps de escritorio (brew cask)|ready"
     )
 }
 

@@ -22,6 +22,8 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 | **Zsh** | Oh My Zsh + Spaceship + plugins + asdf | ✅ |
 | **Git** | Aliases, config portabilizada, gitignore global, lazygit | ✅ |
 | **fzf** | Búsqueda fuzzy + fd, bat, ripgrep | ✅ |
+| **Neovim** | LazyVim con LSP para TS, Go, Python, Rust | ✅ |
+| **Apps** | Apps de escritorio via brew cask (selección interactiva) | ✅ |
 
 ### Ejecutar un módulo específico
 
@@ -207,6 +209,27 @@ tmux kill-session -t nombre # o: tk nombre
 | `tk <nombre>` | `tmux kill-session -t` — cerrar sesión |
 | `ports` | Mostrar puertos en uso |
 | `psg <nombre>` | Buscar proceso por nombre |
+
+### Apps de escritorio
+
+El módulo `apps` instala aplicaciones de escritorio via `brew install --cask` con selección interactiva:
+
+```bash
+./install.sh apps
+```
+
+Apps disponibles organizadas por categoría:
+
+| Categoría | Apps |
+|---|---|
+| **Desarrollo** | VS Code, Cursor, Zed, Sublime Text, Docker, Postman |
+| **IA** | Claude, ChatGPT |
+| **Productividad** | Raycast, Obsidian, Notion, Slack |
+| **Git** | Comet |
+| **Browser** | Arc, Google Chrome, Brave |
+| **Media** | Spotify |
+
+Selección flexible: `1 3 5`, `1-5`, `1,3,7-10`, `a` (todas). Genera reporte al final con instaladas, fallidas y ya existentes.
 
 ---
 

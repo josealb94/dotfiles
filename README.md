@@ -4,6 +4,29 @@ Configuración portable de herramientas de desarrollo. Cross-platform (macOS + L
 
 ## Quick start
 
+### Requisitos previos
+
+**macOS:**
+```bash
+# Git viene con Xcode Command Line Tools
+xcode-select --install
+
+# Instalar Homebrew (gestor de paquetes, requerido por todos los módulos)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**Linux (Ubuntu/Debian/Kali/Parrot):**
+```bash
+sudo apt-get update && sudo apt-get install -y git curl
+```
+
+**Linux (Arch/Manjaro):**
+```bash
+sudo pacman -S git curl
+```
+
+### Instalación
+
 ```bash
 # Clonar
 git clone git@github.com:josealb94/dotfiles.git ~/dotfiles
@@ -12,7 +35,7 @@ git clone git@github.com:josealb94/dotfiles.git ~/dotfiles
 cd ~/dotfiles && chmod +x install.sh && ./install.sh
 ```
 
-El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso.
+El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso. Cada módulo verifica e instala sus dependencias automáticamente (GNU Stow, Nerd Fonts, etc.).
 
 ## Módulos disponibles
 

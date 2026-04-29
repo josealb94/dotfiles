@@ -15,6 +15,8 @@ APP_LIST=(
     # -- IA --
     "claude|Claude|IA"
     "chatgpt|ChatGPT|IA"
+    "ollama-app|Ollama|IA"
+    "opencode-desktop|OpenCode|IA"
     # -- Productividad --
     "raycast|Raycast|Productividad"
     "obsidian|Obsidian|Productividad"

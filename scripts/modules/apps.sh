@@ -60,11 +60,32 @@ apps_is_installed() {
     [ -d "/Applications/${app_name}.app" ]
 }
 
+APPS_UPDATED=()
+
 apps_install_one() {
     local cask_name="$1"
     local display_name="$2"
 
     if apps_is_installed "$cask_name"; then
+        # Verificar si hay actualización disponible via brew
+        if brew list --cask "$cask_name" >/dev/null 2>&1; then
+            local outdated
+            outdated=$(brew outdated --cask "$cask_name" 2>/dev/null)
+            if [ -n "$outdated" ]; then
+                print_warning "$display_name tiene actualización disponible"
+                if confirm "¿Actualizar $display_name?"; then
+                    local output
+                    output=$(brew upgrade --cask "$cask_name" 2>&1)
+                    if [ $? -eq 0 ]; then
+                        APPS_UPDATED+=("$display_name")
+                        print_success "$display_name actualizado"
+                    else
+                        print_error "$display_name no se pudo actualizar"
+                    fi
+                    return 0
+                fi
+            fi
+        fi
         APPS_ALREADY+=("$display_name")
         return 0
     fi
@@ -154,6 +175,14 @@ apps_show_report() {
     if [ ${#APPS_INSTALLED[@]} -gt 0 ]; then
         print_section "Instaladas (${#APPS_INSTALLED[@]})"
         for app in "${APPS_INSTALLED[@]}"; do
+            print_success "$app"
+        done
+    fi
+
+    if [ ${#APPS_UPDATED[@]} -gt 0 ]; then
+        echo ""
+        print_section "Actualizadas (${#APPS_UPDATED[@]})"
+        for app in "${APPS_UPDATED[@]}"; do
             print_success "$app"
         done
     fi

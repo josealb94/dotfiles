@@ -3,6 +3,13 @@
 # utils.sh — Funciones utilitarias para el instalador de dotfiles
 # =============================================================================
 
+# -- Homebrew PATH (bash no lo tiene por defecto en macOS) --------------------
+if [ -x "/opt/homebrew/bin/brew" ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x "/usr/local/bin/brew" ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
+
 # -- Colores ------------------------------------------------------------------
 RED='\033[0;31m'
 GREEN='\033[0;32m'

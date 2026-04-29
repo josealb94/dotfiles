@@ -19,7 +19,7 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 | Módulo | Descripción | Estado |
 |---|---|---|
 | **Ghostty** | Terminal GPU — install, config, Nerd Font | ✅ |
-| **Zsh** | Oh My Zsh + Spaceship + plugins + asdf | ✅ |
+| **Zsh** | Oh My Zsh + Starship + plugins + asdf + CLI tools | ✅ |
 | **Git** | Aliases, config portabilizada, gitignore global, lazygit | ✅ |
 | **fzf** | Búsqueda fuzzy + fd, bat, ripgrep | ✅ |
 | **Neovim** | LazyVim con LSP para TS, Go, Python, Rust | ✅ |

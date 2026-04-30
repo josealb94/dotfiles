@@ -13,7 +13,8 @@ APP_LIST=(
     "docker|Docker Desktop|Desarrollo"
     "postman|Postman|Desarrollo"
     # -- IA --
-    "claude|Claude|IA"
+    "claude|Claude (desktop)|IA"
+    "CUSTOM_claude_code|Claude Code (CLI)|IA"
     "chatgpt|ChatGPT|IA"
     "ollama-app|Ollama|IA"
     "opencode-desktop|OpenCode|IA"
@@ -54,6 +55,8 @@ apps_is_installed() {
         google-chrome)      app_name="Google Chrome" ;;
         brave-browser)      app_name="Brave Browser" ;;
         docker)             app_name="Docker" ;;
+        opencode-desktop)   app_name="OpenCode" ;;
+        ollama-app)         app_name="Ollama" ;;
         *)                  app_name=$(echo "$cask_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1') ;;
     esac
 
@@ -62,9 +65,40 @@ apps_is_installed() {
 
 APPS_UPDATED=()
 
+# -- Instalaciones custom (no brew cask) --------------------------------------
+
+custom_install_claude_code() {
+    if command_exists claude; then
+        local version
+        version=$(claude --version 2>/dev/null | head -1)
+        APPS_ALREADY+=("Claude Code (CLI) — $version")
+        return 0
+    fi
+
+    print_step "Instalando Claude Code (CLI)..."
+    local output
+    output=$(curl -fsSL https://claude.ai/install.sh | bash 2>&1)
+    if command_exists claude; then
+        APPS_INSTALLED+=("Claude Code (CLI)")
+        print_success "Claude Code (CLI) instalado"
+    else
+        APPS_FAILED+=("Claude Code (CLI)|$output")
+        print_error "Claude Code (CLI) falló"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+
 apps_install_one() {
     local cask_name="$1"
     local display_name="$2"
+
+    # Manejar instalaciones custom
+    if echo "$cask_name" | grep -q "^CUSTOM_"; then
+        local custom_func="custom_install_$(echo "$cask_name" | sed 's/^CUSTOM_//')"
+        $custom_func
+        return
+    fi
 
     if apps_is_installed "$cask_name"; then
         # Verificar si hay actualización disponible via brew
@@ -124,7 +158,17 @@ apps_show_menu() {
         fi
 
         # Indicar si ya está instalada
-        if apps_is_installed "$cask_name"; then
+        local is_installed=false
+        if echo "$cask_name" | grep -q "^CUSTOM_"; then
+            # Custom: verificar por comando
+            local cmd_name
+            cmd_name=$(echo "$cask_name" | sed 's/^CUSTOM_//')
+            command_exists "$cmd_name" && is_installed=true
+        elif apps_is_installed "$cask_name"; then
+            is_installed=true
+        fi
+
+        if $is_installed; then
             echo -e "    ${DIM}${i}) ${display_name}  [instalada]${NC}"
         else
             echo -e "    ${BOLD}${i}${NC}) ${display_name}"

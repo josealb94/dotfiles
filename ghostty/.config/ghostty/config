@@ -79,7 +79,6 @@ keybind = global:cmd+grave_accent=toggle_quick_terminal
 # -- macOS --------------------------------------------------------------------
 macos-option-as-alt = true
 macos-titlebar-style = tabs
-macos-window-theme = dark
 
 # -- Quick terminal config ----------------------------------------------------
 quick-terminal-position = top

@@ -155,6 +155,23 @@ if [ -d "/Applications/Visual Studio Code.app/Contents/Resources/app/bin" ]; the
     export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 fi
 
+# -- Claude Code apuntando a Ollama local ------------------------------------
+# Permite usar Claude Code con modelos locales de Ollama (sin enviar a la nube)
+# Requiere: Ollama instalado y corriendo en localhost:11434
+claude-local() {
+    local model="${1:-qwen2.5-coder:7b-32k}"
+    shift 2>/dev/null
+    ANTHROPIC_BASE_URL="http://localhost:11434" \
+    ANTHROPIC_AUTH_TOKEN="ollama" \
+    ANTHROPIC_API_KEY="" \
+    claude --model "$model" "$@"
+}
+
+# Variantes rápidas para modelos comunes
+claude-coder()      { claude-local "qwen2.5-coder:7b-32k" "$@"; }
+claude-qwen()       { claude-local "qwen3:8b-32k" "$@"; }
+claude-cloud-free() { claude-local "qwen3.5:cloud" "$@"; }
+
 # -- Aliases ------------------------------------------------------------------
 [ -f "$HOME/.zsh_aliases" ] && source "$HOME/.zsh_aliases"
 

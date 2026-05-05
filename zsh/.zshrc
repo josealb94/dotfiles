@@ -159,7 +159,7 @@ fi
 # Permite usar Claude Code con modelos locales de Ollama (sin enviar a la nube)
 # Requiere: Ollama instalado y corriendo en localhost:11434
 claude-local() {
-    local model="${1:-qwen2.5-coder:7b-32k}"
+    local model="${1:-qwen3:8b}"
     shift 2>/dev/null
     ANTHROPIC_BASE_URL="http://localhost:11434" \
     ANTHROPIC_AUTH_TOKEN="ollama" \
@@ -167,10 +167,11 @@ claude-local() {
     claude --model "$model" "$@"
 }
 
-# Variantes rápidas para modelos comunes
-claude-coder()      { claude-local "qwen2.5-coder:7b-32k" "$@"; }
-claude-qwen()       { claude-local "qwen3:8b-32k" "$@"; }
-claude-cloud-free() { claude-local "qwen3.5:cloud" "$@"; }
+# Variantes por tipo de modelo
+claude-general() { claude-local "qwen3:8b"           "$@"; }  # General
+claude-coder()   { claude-local "qwen2.5-coder:14b"  "$@"; }  # Código
+claude-doc()     { claude-local "gemma3:12b"         "$@"; }  # Documentación (Google)
+claude-big()     { claude-local "qwen3:30b"          "$@"; }  # Modelo grande
 
 # -- Aliases ------------------------------------------------------------------
 [ -f "$HOME/.zsh_aliases" ] && source "$HOME/.zsh_aliases"

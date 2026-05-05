@@ -170,3 +170,6 @@ fi
 if command -v starship >/dev/null 2>&1; then
     eval "$(starship init zsh)"
 fi
+
+# opencode
+export PATH=/Users/josealb94/.opencode/bin:$PATH

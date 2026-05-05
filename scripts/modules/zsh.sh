@@ -205,8 +205,14 @@ zsh_setup_asdf_nodejs() {
         print_warning "No hay versión de Node.js configurada en asdf"
         if confirm "¿Instalar Node.js LTS via asdf?"; then
             asdf install nodejs latest
-            asdf global nodejs latest
-            print_success "Node.js instalado via asdf"
+            # asdf v0.16+ usa "set -u", asdf < v0.16 usa "global"
+            if asdf set -u nodejs latest 2>/dev/null; then
+                print_success "Node.js instalado y configurado via asdf"
+            elif asdf global nodejs latest 2>/dev/null; then
+                print_success "Node.js instalado y configurado via asdf"
+            else
+                print_warning "Node.js instalado pero falló al configurarlo como default"
+            fi
         fi
     else
         local node_version

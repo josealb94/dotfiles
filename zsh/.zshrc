@@ -108,13 +108,19 @@ export GEM_HOME="$HOME/.gem"
 export GEM_PATH="$HOME/.gem"
 
 # -- asdf (version manager: nodejs, golang, ruby, rust, java, ...) -----------
+# asdf v0.16+ (rewrite en Go): solo requiere shims en PATH
+if [ -d "$HOME/.asdf/shims" ]; then
+    export PATH="$HOME/.asdf/shims:$PATH"
+fi
+# asdf < v0.16: source del script
 if [ -f "$HOME/.asdf/asdf.sh" ]; then
     . "$HOME/.asdf/asdf.sh"
     if [ -d "${ASDF_DIR}/completions" ]; then
         fpath=(${ASDF_DIR}/completions $fpath)
     fi
-    autoload -Uz compinit && compinit
 fi
+# Completions para zsh
+autoload -Uz compinit && compinit
 
 # -- fzf ----------------------------------------------------------------------
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

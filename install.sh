@@ -34,6 +34,7 @@ declare_modules() {
         "fzf|fzf (búsqueda en terminal)|ready"
         "nvim|Neovim + LazyVim (editor)|ready"
         "apps|Apps de escritorio (brew cask)|ready"
+        "opencode|OpenCode + Ollama (modelos locales)|ready"
     )
 }
 

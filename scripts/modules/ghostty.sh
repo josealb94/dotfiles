@@ -34,28 +34,8 @@ ghostty_install() {
             sudo pacman -S --noconfirm ghostty
             ;;
         apt)
-            print_warning "Ghostty no publica paquete oficial en apt"
-            echo ""
-            echo -e "  Opciones recomendadas para Debian/Kali:"
-            echo ""
-            echo -e "    ${BOLD}1. Snap${NC} (más rápido si snapd está disponible):"
-            echo -e "       ${DIM}sudo apt install snapd${NC}"
-            echo -e "       ${DIM}sudo snap install ghostty --classic${NC}"
-            echo ""
-            echo -e "    ${BOLD}2. Flatpak${NC} (alternativa contenedorizada):"
-            echo -e "       ${DIM}sudo apt install flatpak${NC}"
-            echo -e "       ${DIM}flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo${NC}"
-            echo -e "       ${DIM}flatpak install flathub com.mitchellh.ghostty${NC}"
-            echo ""
-            echo -e "    ${BOLD}3. Compilar desde source${NC} (requiere Zig ≥ 0.13):"
-            echo -e "       ${DIM}https://ghostty.org/docs/install/build${NC}"
-            echo ""
-            print_info "Documentación oficial: https://ghostty.org/docs/install/binary"
-            echo ""
-            print_info "Después de instalar Ghostty manualmente, volvé a correr:"
-            echo -e "       ${DIM}./install.sh ghostty${NC}"
-            print_info "y solo se aplicará la configuración (config-linux con tus keybinds)."
-            return 1
+            ghostty_install_apt
+            return $?
             ;;
         dnf)
             print_info "Verificando COPR para Ghostty..."
@@ -72,6 +52,111 @@ ghostty_install() {
             return 1
             ;;
     esac
+}
+
+# -- Instalación en apt (Debian/Kali/Ubuntu) ---------------------------------
+# Ghostty no publica paquete oficial en apt. Mostramos las opciones reales
+# y, en Debian/Kali, ofrecemos automatizar el repo comunitario de Dario Griffo
+# que es la opción más cercana a un paquete nativo (recomendada por la doc
+# oficial: https://ghostty.org/docs/install/binary#debian).
+ghostty_install_apt() {
+    print_warning "Ghostty no publica paquete oficial en apt"
+    echo ""
+    echo -e "  Opciones disponibles:"
+    echo ""
+
+    if [ "$OS_ID" = "kali" ] || [ "$OS_ID" = "debian" ]; then
+        echo -e "    ${BOLD}1. APT repo comunitario${NC} (dariogriffo/ghostty-debian)"
+        echo -e "       ${DIM}Update via apt como cualquier paquete. Soporta Bookworm/Trixie/Sid.${NC}"
+        echo -e "       ${DIM}Es la opción más \"nativa\" para Debian/Kali.${NC}"
+        echo ""
+    elif [ "$OS_ID" = "ubuntu" ]; then
+        echo -e "    ${BOLD}1. Script comunitario para Ubuntu${NC} (mkasberg/ghostty-ubuntu)"
+        echo -e "       ${DIM}/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)\"${NC}"
+        echo ""
+    fi
+
+    echo -e "    ${BOLD}2. Snap${NC}     — sudo snap install ghostty --classic"
+    echo -e "       ${DIM}(requiere snapd: sudo apt install snapd)${NC}"
+    echo ""
+    echo -e "    ${BOLD}3. AppImage${NC} — binario portable, no toca el sistema"
+    echo -e "       ${DIM}https://github.com/ghostty-org/ghostty/releases${NC}"
+    echo ""
+    echo -e "    ${BOLD}4. Source${NC}   — requiere Zig ≥ 0.13"
+    echo -e "       ${DIM}https://ghostty.org/docs/install/build${NC}"
+    echo ""
+    print_info "Documentación: https://ghostty.org/docs/install/binary#debian"
+    echo ""
+
+    # Solo automatizamos el repo comunitario para Debian/Kali (los codenames
+    # de Ubuntu no son soportados por dariogriffo).
+    if [ "$OS_ID" = "kali" ] || [ "$OS_ID" = "debian" ]; then
+        if confirm "¿Configurar el APT repo comunitario (opción 1) e instalar?"; then
+            ghostty_install_dariogriffo_repo
+            return $?
+        fi
+    fi
+
+    echo ""
+    print_info "Instalá Ghostty con tu método preferido y luego volvé a correr:"
+    echo -e "       ${DIM}./install.sh ghostty${NC}"
+    print_info "para aplicar la configuración (config-linux con tus keybinds)."
+    return 1
+}
+
+ghostty_install_dariogriffo_repo() {
+    # El repo soporta bookworm/trixie/sid. Kali rolling no tiene un codename
+    # propio en el repo → usar 'sid' (Kali tracks Debian unstable/testing).
+    local codename
+    case "$OS_ID" in
+        kali)
+            codename="sid"
+            print_info "Kali rolling: usando codename '${codename}' del repo comunitario"
+            ;;
+        debian)
+            if command_exists lsb_release; then
+                codename=$(lsb_release -sc 2>/dev/null)
+            fi
+            if [ -z "$codename" ] && [ -f /etc/os-release ]; then
+                codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+            fi
+            if [ -z "$codename" ]; then
+                print_error "No se pudo detectar el codename de Debian"
+                return 1
+            fi
+            ;;
+        *)
+            print_error "Repo comunitario solo soportado en Debian/Kali (OS_ID=${OS_ID})"
+            return 1
+            ;;
+    esac
+
+    print_step "Agregando clave GPG de debian.griffo.io..."
+    if ! curl -fsSL https://debian.griffo.io/EA0F721D231FDD3A0A17B9AC7808B4DD62C41256.asc \
+        | sudo gpg --dearmor -o /usr/share/keyrings/debian.griffo.io.gpg; then
+        print_error "Falló la descarga/import de la clave GPG"
+        return 1
+    fi
+
+    print_step "Agregando repo a /etc/apt/sources.list.d/ (codename: ${codename})..."
+    echo "deb [signed-by=/usr/share/keyrings/debian.griffo.io.gpg] https://debian.griffo.io/apt ${codename} main" \
+        | sudo tee /etc/apt/sources.list.d/debian.griffo.io.list >/dev/null
+
+    print_step "Actualizando apt..."
+    if ! sudo apt-get update; then
+        print_error "Falló apt-get update — revisá la salida arriba"
+        return 1
+    fi
+
+    print_step "Instalando ghostty..."
+    if sudo apt-get install -y ghostty; then
+        print_success "Ghostty instalado via repo comunitario"
+        return 0
+    else
+        print_error "Falló la instalación de ghostty"
+        print_info "Si el problema es el codename, probá manualmente con bookworm o trixie"
+        return 1
+    fi
 }
 
 ghostty_update() {
@@ -91,10 +176,17 @@ ghostty_update() {
             print_success "Ghostty actualizado"
             ;;
         apt)
-            print_info "Actualización depende del método de instalación que usaste:"
-            echo -e "    ${DIM}Snap:    sudo snap refresh ghostty${NC}"
-            echo -e "    ${DIM}Flatpak: flatpak update com.mitchellh.ghostty${NC}"
-            echo -e "    ${DIM}Source:  re-pull y rebuild${NC}"
+            # Si está instalado via el repo comunitario, podemos updatear via apt
+            if dpkg -l ghostty 2>/dev/null | grep -q "^ii"; then
+                print_step "Detectado ghostty via apt — actualizando..."
+                sudo apt-get update && sudo apt-get install -y --only-upgrade ghostty
+                print_success "Ghostty actualizado via apt"
+            else
+                print_info "Actualización depende del método de instalación que usaste:"
+                echo -e "    ${DIM}Snap:     sudo snap refresh ghostty${NC}"
+                echo -e "    ${DIM}AppImage: re-descargar de https://github.com/ghostty-org/ghostty/releases${NC}"
+                echo -e "    ${DIM}Source:   git pull && rebuild${NC}"
+            fi
             ;;
         dnf)
             sudo dnf upgrade -y ghostty

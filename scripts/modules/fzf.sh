@@ -3,8 +3,9 @@
 # fzf.sh — Módulo de instalación y configuración de fzf + herramientas
 # =============================================================================
 
-# Herramientas que fzf usa para previews y búsquedas
-FZF_DEPS="fd bat tree ripgrep"
+# Herramientas que fzf usa para previews y búsquedas (binarios reales).
+# install_tool sabe traducir cada uno al paquete correcto por OS.
+FZF_DEPS="fd bat tree rg"
 
 fzf_check_installed() {
     if command_exists fzf; then
@@ -45,15 +46,9 @@ fzf_check_deps() {
     local missing=""
 
     for dep in $FZF_DEPS; do
-        local cmd_name="$dep"
-        # ripgrep se instala como rg
-        if [ "$dep" = "ripgrep" ]; then
-            cmd_name="rg"
-        fi
-
-        if command_exists "$cmd_name"; then
+        if command_exists "$dep"; then
             local ver
-            ver=$("$cmd_name" --version 2>/dev/null | head -1)
+            ver=$("$dep" --version 2>/dev/null | head -1)
             print_success "${dep} ($ver)"
         else
             print_warning "${dep} no instalado"
@@ -73,44 +68,88 @@ fzf_install_deps() {
     local deps="$1"
     for dep in $deps; do
         print_step "Instalando ${dep}..."
-        case "$PKG_MANAGER" in
-            brew)   brew install "$dep" ;;
-            apt)    sudo apt-get install -y "$dep" ;;
-            pacman) sudo pacman -S --noconfirm "$dep" ;;
-            dnf)    sudo dnf install -y "$dep" ;;
-        esac
+        # install_tool conoce las particularidades por OS:
+        #   fd  → apt: paquete fd-find, binario fdfind (symlink en ~/.local/bin)
+        #   bat → apt: paquete bat,     binario batcat  (symlink en ~/.local/bin)
+        #   rg  → todos: paquete ripgrep, binario rg
+        install_tool "$dep" || print_error "Falló instalación de ${dep}"
     done
-    print_success "Dependencias instaladas"
+    print_success "Dependencias procesadas"
 }
 
 fzf_setup_shell_integration() {
-    # Regenerar ~/.fzf.zsh con la versión actual de fzf
-    local fzf_base=""
+    # Detectar dónde viven key-bindings.zsh y completion.zsh según el origen.
+    # Cada distro/package manager los pone en una ruta distinta — no asumimos
+    # que existe el script `install` de upstream (no viene en apt/pacman/dnf).
+    local key_bindings=""
+    local completion=""
+    local source_label=""
 
     case "$PKG_MANAGER" in
         brew)
-            fzf_base="$(brew --prefix)/opt/fzf"
-            ;;
-        *)
-            # Buscar instalación de fzf
-            if [ -d "$HOME/.fzf" ]; then
-                fzf_base="$HOME/.fzf"
-            elif [ -d "/usr/share/fzf" ]; then
-                fzf_base="/usr/share/fzf"
+            local prefix
+            prefix="$(brew --prefix fzf 2>/dev/null)"
+            if [ -n "$prefix" ]; then
+                key_bindings="$prefix/shell/key-bindings.zsh"
+                completion="$prefix/shell/completion.zsh"
+                source_label="brew"
             fi
+            ;;
+        apt)
+            # Debian/Ubuntu/Kali/Parrot: archivos como documentación
+            key_bindings="/usr/share/doc/fzf/examples/key-bindings.zsh"
+            completion="/usr/share/doc/fzf/examples/completion.zsh"
+            source_label="apt"
+            ;;
+        pacman)
+            key_bindings="/usr/share/fzf/key-bindings.zsh"
+            completion="/usr/share/fzf/completion.zsh"
+            source_label="pacman"
+            ;;
+        dnf)
+            key_bindings="/usr/share/fzf/shell/key-bindings.zsh"
+            completion="/usr/share/fzf/shell/completion.zsh"
+            source_label="dnf"
             ;;
     esac
 
-    if [ -n "$fzf_base" ] && [ -f "$fzf_base/install" ]; then
-        print_step "Configurando shell integration de fzf..."
-        "$fzf_base/install" --key-bindings --completion --no-update-rc --no-bash --no-fish 2>/dev/null
-        print_success "Shell integration configurada (~/.fzf.zsh)"
-    elif [ -f "$HOME/.fzf.zsh" ]; then
-        print_success "Shell integration ya existe (~/.fzf.zsh)"
-    else
-        print_warning "No se pudo configurar shell integration automáticamente"
-        print_info "fzf seguirá funcionando pero sin keybindings (CTRL-T, CTRL-R, ALT-C)"
+    # Fallback: instalación manual via git clone (~/.fzf/shell/)
+    if [ ! -f "$key_bindings" ] && [ -d "$HOME/.fzf/shell" ]; then
+        key_bindings="$HOME/.fzf/shell/key-bindings.zsh"
+        completion="$HOME/.fzf/shell/completion.zsh"
+        source_label="git"
     fi
+
+    if [ ! -f "$key_bindings" ] || [ ! -f "$completion" ]; then
+        if [ -f "$HOME/.fzf.zsh" ]; then
+            print_success "Shell integration ya existe (~/.fzf.zsh)"
+            return 0
+        fi
+        print_warning "No se encontraron archivos de integración de fzf"
+        print_info "Buscado en: ${key_bindings:-(ruta no detectada)}"
+        print_info "fzf seguirá funcionando pero sin keybindings (CTRL-T, CTRL-R, ALT-C)"
+        return 1
+    fi
+
+    # Backup si hay un .fzf.zsh real (no symlink, no auto-generado por nosotros)
+    if [ -f "$HOME/.fzf.zsh" ] && [ ! -L "$HOME/.fzf.zsh" ] && \
+       ! head -1 "$HOME/.fzf.zsh" 2>/dev/null | grep -q "Generado por dotfiles"; then
+        cp "$HOME/.fzf.zsh" "$HOME/.fzf.zsh.backup.$(date +%Y%m%d)"
+        print_info "Backup de .fzf.zsh anterior → ~/.fzf.zsh.backup.$(date +%Y%m%d)"
+    fi
+
+    print_step "Generando ~/.fzf.zsh (${source_label})..."
+    cat > "$HOME/.fzf.zsh" <<EOF
+# ~/.fzf.zsh — Generado por dotfiles (origen: ${source_label})
+# fzf shell integration: keybindings (CTRL-T, CTRL-R, ALT-C) y completion
+
+# Auto-completion (solo en shells interactivas)
+[[ \$- == *i* ]] && source "${completion}" 2>/dev/null
+
+# Key bindings
+source "${key_bindings}"
+EOF
+    print_success "Shell integration configurada (~/.fzf.zsh → ${source_label})"
 }
 
 fzf_configure() {

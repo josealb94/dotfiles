@@ -7,13 +7,56 @@ ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 # -- Verificaciones -----------------------------------------------------------
 
+zsh_ensure_installed() {
+    if command_exists zsh; then
+        return 0
+    fi
+
+    print_warning "zsh no está instalado"
+    if ! confirm "¿Instalar zsh?"; then
+        print_error "zsh es requerido para este módulo"
+        return 1
+    fi
+
+    print_step "Instalando zsh..."
+    case "$PKG_MANAGER" in
+        brew)   brew install zsh ;;
+        apt)    sudo apt-get update && sudo apt-get install -y zsh ;;
+        pacman) sudo pacman -S --noconfirm zsh ;;
+        dnf)    sudo dnf install -y zsh ;;
+        *)
+            print_error "No se pudo instalar zsh automáticamente para ${PKG_MANAGER}"
+            return 1
+            ;;
+    esac
+
+    if command_exists zsh; then
+        print_success "zsh instalado ($(zsh --version | awk '{print $2}'))"
+    else
+        print_error "Falló la instalación de zsh"
+        return 1
+    fi
+}
+
 zsh_check_default_shell() {
+    # Verificar primero que zsh esté instalado
+    zsh_ensure_installed || return 1
+
     local current_shell
     current_shell=$(basename "$SHELL")
     if [ "$current_shell" != "zsh" ]; then
         print_warning "Tu shell por defecto es ${BOLD}${current_shell}${NC}${YELLOW}, no zsh"
         if confirm "¿Cambiar shell por defecto a zsh?"; then
-            chsh -s "$(which zsh)"
+            local zsh_path
+            zsh_path="$(command -v zsh)"
+
+            # Asegurar que zsh está en /etc/shells (necesario en Linux)
+            if [ -f /etc/shells ] && ! grep -qx "$zsh_path" /etc/shells; then
+                print_step "Agregando $zsh_path a /etc/shells..."
+                echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+            fi
+
+            chsh -s "$zsh_path"
             print_success "Shell cambiado a zsh (requiere re-login)"
         fi
     else
@@ -116,12 +159,9 @@ zsh_check_cli_tools() {
         if confirm "¿Instalar herramientas faltantes?${missing}"; then
             for tool in $missing; do
                 print_step "Instalando ${tool}..."
-                case "$PKG_MANAGER" in
-                    brew)   brew install "$tool" ;;
-                    apt)    sudo apt-get install -y "$tool" ;;
-                    pacman) sudo pacman -S --noconfirm "$tool" ;;
-                    dnf)    sudo dnf install -y "$tool" ;;
-                esac
+                # install_tool conoce los casos especiales: eza no está en apt
+                # de Kali/Debian → baja binario de GitHub
+                install_tool "$tool"
             done
             print_success "Herramientas instaladas"
         fi

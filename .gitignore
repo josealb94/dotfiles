@@ -6,3 +6,6 @@ dotfiles.conf
 
 # Backups generados por el instalador
 *.bak
+
+# Override OS-específico de Ghostty (symlink creado por ghostty.sh por máquina)
+ghostty/.config/ghostty/config.local

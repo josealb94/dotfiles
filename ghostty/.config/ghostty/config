@@ -1,6 +1,14 @@
 # =============================================================================
-# Ghostty — Configuración
+# Ghostty — Configuración base (compartida macOS + Linux)
 # Docs: https://ghostty.org/docs/config/reference
+#
+# Los keybinds y opciones específicas de cada OS viven en:
+#   - config-macos : cmd-based keybinds, opciones macos-*, quick terminal
+#   - config-linux : alt/super-based keybinds (mapeo equivalente)
+#
+# El módulo ghostty.sh crea un symlink ~/.config/ghostty/config.local apuntando
+# al archivo correcto según el OS. Así solo se carga el set válido y no hay
+# warnings por modificadores desconocidos en cada arranque.
 # =============================================================================
 
 # -- Fuente -------------------------------------------------------------------
@@ -44,43 +52,9 @@ scrollback-limit = 50000
 # Los splits inactivos se atenúan para que sea obvio cuál es el activo
 unfocused-split-opacity = 0.55
 
-# -- Keybindings --------------------------------------------------------------
-# Splits
-keybind = cmd+d=new_split:right
-keybind = cmd+shift+d=new_split:down
-keybind = cmd+shift+enter=toggle_split_zoom
-
-# Navegar entre splits
-keybind = cmd+alt+left=goto_split:left
-keybind = cmd+alt+right=goto_split:right
-keybind = cmd+alt+up=goto_split:top
-keybind = cmd+alt+down=goto_split:down
-
-# Navegar splits secuencialmente (rápido con una mano)
-keybind = cmd+[=goto_split:previous
-keybind = cmd+]=goto_split:next
-
-# Redimensionar splits
-keybind = cmd+ctrl+left=resize_split:left,20
-keybind = cmd+ctrl+right=resize_split:right,20
-keybind = cmd+ctrl+up=resize_split:up,20
-keybind = cmd+ctrl+down=resize_split:down,20
-
-# Igualar tamaño de todos los splits
-keybind = cmd+ctrl+=equalize_splits
-
-# Tabs
-keybind = cmd+t=new_tab
-keybind = cmd+w=close_surface
-
-# Quick terminal (overlay global — invoca Ghostty desde cualquier app)
-keybind = global:cmd+grave_accent=toggle_quick_terminal
-
-# -- macOS --------------------------------------------------------------------
-macos-option-as-alt = true
-macos-titlebar-style = tabs
-
-# -- Quick terminal config ----------------------------------------------------
-quick-terminal-position = top
-quick-terminal-screen = main
-quick-terminal-animation-duration = 0.15
+# -- Override OS-específico (keybinds + opciones de plataforma) --------------
+# config.local es un symlink creado por ghostty.sh apuntando a:
+#   - config-macos en macOS
+#   - config-linux en Linux
+# El prefijo `?` indica "incluir si existe" (no error si falta).
+config-file = ?config.local

@@ -10,6 +10,12 @@ elif [ -x "/usr/local/bin/brew" ]; then
     eval "$(/usr/local/bin/brew shellenv)"
 fi
 
+# -- ~/.local/bin en PATH (donde caen symlinks de install_apt_tool) ----------
+case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+
 # -- Colores ------------------------------------------------------------------
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -231,4 +237,137 @@ install_nerd_font() {
             rm -rf "$tmp_dir"
             ;;
     esac
+}
+
+# -- Instalación de CLI tools (cross-platform) -------------------------------
+# Maneja los casos donde el nombre del paquete o del binario difiere por OS.
+# Conocidos:
+#   fd   → apt: paquete fd-find, binario fdfind  → symlink a ~/.local/bin/fd
+#   bat  → apt: paquete bat,     binario batcat  → symlink a ~/.local/bin/bat
+#   eza  → apt: no está en repos, descargar binario musl de GitHub releases
+#   rg   → todos: paquete ripgrep, binario rg
+
+install_apt_tool() {
+    # install_apt_tool <bin_esperado> <paquete_apt> [bin_instalado]
+    # Si bin_instalado != bin_esperado, crea symlink en ~/.local/bin/
+    local bin="$1"
+    local apt_pkg="$2"
+    local apt_bin="${3:-$bin}"
+
+    sudo apt-get install -y "$apt_pkg" || return 1
+
+    if [ "$apt_bin" != "$bin" ]; then
+        if command_exists "$apt_bin"; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$(command -v "$apt_bin")" "$HOME/.local/bin/$bin"
+            print_info "Symlink: ~/.local/bin/${bin} → ${apt_bin}"
+        else
+            print_warning "Paquete ${apt_pkg} instalado pero ${apt_bin} no encontrado"
+            return 1
+        fi
+    fi
+}
+
+install_eza_from_github() {
+    print_step "eza no está en apt — descargando desde GitHub releases..."
+
+    local arch
+    case "$(uname -m)" in
+        x86_64)         arch="x86_64-unknown-linux-musl" ;;
+        aarch64|arm64)  arch="aarch64-unknown-linux-musl" ;;
+        *)
+            print_error "Arquitectura $(uname -m) no soportada para eza"
+            return 1
+            ;;
+    esac
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local url="https://github.com/eza-community/eza/releases/latest/download/eza_${arch}.tar.gz"
+
+    if curl -fsSL "$url" -o "$tmp_dir/eza.tar.gz"; then
+        tar -xzf "$tmp_dir/eza.tar.gz" -C "$tmp_dir" 2>/dev/null
+        if [ -f "$tmp_dir/eza" ]; then
+            mkdir -p "$HOME/.local/bin"
+            mv "$tmp_dir/eza" "$HOME/.local/bin/eza"
+            chmod +x "$HOME/.local/bin/eza"
+            print_success "eza instalado en ~/.local/bin/eza"
+        else
+            print_error "El tarball no contiene el binario eza esperado"
+            rm -rf "$tmp_dir"
+            return 1
+        fi
+    else
+        print_error "No se pudo descargar eza desde GitHub"
+        print_info "URL: $url"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    rm -rf "$tmp_dir"
+}
+
+install_tool() {
+    # install_tool <binario>
+    # Sabe traducir nombre de binario → paquete correcto por OS.
+    local bin="$1"
+
+    if command_exists "$bin"; then
+        return 0
+    fi
+
+    case "$bin" in
+        rg)
+            case "$PKG_MANAGER" in
+                brew)   brew install ripgrep ;;
+                apt)    sudo apt-get install -y ripgrep ;;
+                pacman) sudo pacman -S --noconfirm ripgrep ;;
+                dnf)    sudo dnf install -y ripgrep ;;
+                *) print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"; return 1 ;;
+            esac
+            ;;
+        fd)
+            case "$PKG_MANAGER" in
+                brew)   brew install fd ;;
+                apt)    install_apt_tool fd fd-find fdfind ;;
+                pacman) sudo pacman -S --noconfirm fd ;;
+                dnf)    sudo dnf install -y fd-find ;;
+                *) print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"; return 1 ;;
+            esac
+            ;;
+        bat)
+            case "$PKG_MANAGER" in
+                brew)   brew install bat ;;
+                apt)    install_apt_tool bat bat batcat ;;
+                pacman) sudo pacman -S --noconfirm bat ;;
+                dnf)    sudo dnf install -y bat ;;
+                *) print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"; return 1 ;;
+            esac
+            ;;
+        eza)
+            case "$PKG_MANAGER" in
+                brew)   brew install eza ;;
+                apt)    install_eza_from_github ;;
+                pacman) sudo pacman -S --noconfirm eza ;;
+                dnf)    sudo dnf install -y eza 2>/dev/null || install_eza_from_github ;;
+                *) print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"; return 1 ;;
+            esac
+            ;;
+        *)
+            # Genérico: paquete y binario tienen el mismo nombre
+            case "$PKG_MANAGER" in
+                brew)   brew install "$bin" ;;
+                apt)    sudo apt-get install -y "$bin" ;;
+                pacman) sudo pacman -S --noconfirm "$bin" ;;
+                dnf)    sudo dnf install -y "$bin" ;;
+                *) print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"; return 1 ;;
+            esac
+            ;;
+    esac
+
+    if command_exists "$bin"; then
+        return 0
+    else
+        print_error "Falló la instalación de ${bin}"
+        return 1
+    fi
 }

@@ -12,8 +12,12 @@ ghostty_get_version() {
             fi
             ;;
         linux)
+            # Cualquier install que ponga `ghostty` en PATH (Snap, source build, etc.)
             if command_exists ghostty; then
                 version=$(ghostty --version 2>/dev/null | head -1 | awk '{print $2}')
+            # Flatpak: el binario no queda en PATH, hay que invocar via flatpak run
+            elif command_exists flatpak && flatpak info com.mitchellh.ghostty >/dev/null 2>&1; then
+                version=$(flatpak run com.mitchellh.ghostty --version 2>/dev/null | head -1 | awk '{print $2}')
             fi
             ;;
     esac
@@ -30,20 +34,28 @@ ghostty_install() {
             sudo pacman -S --noconfirm ghostty
             ;;
         apt)
-            print_warning "Ghostty no tiene paquete oficial en apt"
+            print_warning "Ghostty no publica paquete oficial en apt"
             echo ""
-            echo -e "  Opciones de instalación manual:"
-            echo -e "    ${DIM}1. Descargar .deb desde GitHub releases${NC}"
-            echo -e "    ${DIM}2. Compilar desde código fuente (requiere Zig >= 0.13)${NC}"
-            echo -e "    ${DIM}3. Usar el AppImage${NC}"
+            echo -e "  Opciones recomendadas para Debian/Kali:"
             echo ""
-            print_info "Guía: https://ghostty.org/docs/install/binary"
+            echo -e "    ${BOLD}1. Snap${NC} (más rápido si snapd está disponible):"
+            echo -e "       ${DIM}sudo apt install snapd${NC}"
+            echo -e "       ${DIM}sudo snap install ghostty --classic${NC}"
             echo ""
-            if confirm "¿Intentar instalar desde .deb (GitHub releases)?"; then
-                ghostty_install_deb
-            else
-                return 1
-            fi
+            echo -e "    ${BOLD}2. Flatpak${NC} (alternativa contenedorizada):"
+            echo -e "       ${DIM}sudo apt install flatpak${NC}"
+            echo -e "       ${DIM}flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo${NC}"
+            echo -e "       ${DIM}flatpak install flathub com.mitchellh.ghostty${NC}"
+            echo ""
+            echo -e "    ${BOLD}3. Compilar desde source${NC} (requiere Zig ≥ 0.13):"
+            echo -e "       ${DIM}https://ghostty.org/docs/install/build${NC}"
+            echo ""
+            print_info "Documentación oficial: https://ghostty.org/docs/install/binary"
+            echo ""
+            print_info "Después de instalar Ghostty manualmente, volvé a correr:"
+            echo -e "       ${DIM}./install.sh ghostty${NC}"
+            print_info "y solo se aplicará la configuración (config-linux con tus keybinds)."
+            return 1
             ;;
         dnf)
             print_info "Verificando COPR para Ghostty..."
@@ -60,38 +72,6 @@ ghostty_install() {
             return 1
             ;;
     esac
-}
-
-ghostty_install_deb() {
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-
-    print_step "Buscando última versión en GitHub..."
-    local latest_url
-    latest_url=$(curl -fsSL "https://api.github.com/repos/ghostty-org/ghostty/releases/latest" 2>/dev/null \
-        | grep "browser_download_url.*\.deb" \
-        | grep "$(dpkg --print-architecture 2>/dev/null || echo 'amd64')" \
-        | head -1 \
-        | cut -d'"' -f4)
-
-    if [ -z "$latest_url" ]; then
-        print_error "No se encontró .deb en las releases de GitHub"
-        print_info "Es posible que Ghostty no publique .deb — revisa https://ghostty.org/docs/install"
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-
-    print_step "Descargando $latest_url..."
-    if curl -fsSL "$latest_url" -o "$tmp_dir/ghostty.deb"; then
-        sudo dpkg -i "$tmp_dir/ghostty.deb"
-        sudo apt-get install -f -y 2>/dev/null
-        print_success "Ghostty instalado desde .deb"
-    else
-        print_error "Error descargando el paquete"
-        rm -rf "$tmp_dir"
-        return 1
-    fi
-    rm -rf "$tmp_dir"
 }
 
 ghostty_update() {
@@ -111,7 +91,10 @@ ghostty_update() {
             print_success "Ghostty actualizado"
             ;;
         apt)
-            print_warning "Para actualizar en apt, re-ejecuta la instalación"
+            print_info "Actualización depende del método de instalación que usaste:"
+            echo -e "    ${DIM}Snap:    sudo snap refresh ghostty${NC}"
+            echo -e "    ${DIM}Flatpak: flatpak update com.mitchellh.ghostty${NC}"
+            echo -e "    ${DIM}Source:  re-pull y rebuild${NC}"
             ;;
         dnf)
             sudo dnf upgrade -y ghostty
@@ -127,10 +110,29 @@ ghostty_configure() {
     # Aplicar config via stow
     apply_stow "ghostty" || return 1
 
+    # Crear symlink config.local apuntando al override OS-específico.
+    # config base referencia `config-file = ?config.local` — solo se carga
+    # el set de keybinds válido para el OS actual.
+    local xdg_dir="$HOME/.config/ghostty"
+    local config_local="$xdg_dir/config.local"
+    local target=""
+
+    case "$OS" in
+        macos)  target="config-macos" ;;
+        linux)  target="config-linux" ;;
+    esac
+
+    if [ -n "$target" ] && [ -f "$xdg_dir/$target" ]; then
+        ln -sf "$target" "$config_local"
+        print_success "Override OS aplicado: config.local → ${target}"
+    else
+        print_warning "No se encontró ${target} en ${xdg_dir}"
+    fi
+
     # En macOS, crear symlink desde Application Support → XDG config
     if [ "$OS" = "macos" ]; then
         local macos_dir="$HOME/Library/Application Support/com.mitchellh.ghostty"
-        local xdg_config="$HOME/.config/ghostty/config"
+        local xdg_config="$xdg_dir/config"
         local macos_config="$macos_dir/config"
 
         if [ -f "$xdg_config" ]; then

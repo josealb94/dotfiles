@@ -1,14 +1,9 @@
 # =============================================================================
-# Ghostty — Configuración base (compartida macOS + Linux)
+# Ghostty — Configuración base (macOS)
 # Docs: https://ghostty.org/docs/config/reference
 #
-# Los keybinds y opciones específicas de cada OS viven en:
-#   - config-macos : cmd-based keybinds, opciones macos-*, quick terminal
-#   - config-linux : alt/super-based keybinds (mapeo equivalente)
-#
-# El módulo ghostty.sh crea un symlink ~/.config/ghostty/config.local apuntando
-# al archivo correcto según el OS. Así solo se carga el set válido y no hay
-# warnings por modificadores desconocidos en cada arranque.
+# Los keybinds y opciones específicas de macOS viven en config-macos.
+# El módulo ghostty.sh crea un symlink ~/.config/ghostty/config.local → config-macos.
 # =============================================================================
 
 # -- Fuente -------------------------------------------------------------------
@@ -52,9 +47,7 @@ scrollback-limit = 50000
 # Los splits inactivos se atenúan para que sea obvio cuál es el activo
 unfocused-split-opacity = 0.55
 
-# -- Override OS-específico (keybinds + opciones de plataforma) --------------
-# config.local es un symlink creado por ghostty.sh apuntando a:
-#   - config-macos en macOS
-#   - config-linux en Linux
+# -- Override macOS (keybinds + opciones macos-*) ----------------------------
+# config.local es un symlink → config-macos creado por ghostty.sh.
 # El prefijo `?` indica "incluir si existe" (no error si falta).
 config-file = ?config.local

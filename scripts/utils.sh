@@ -306,6 +306,76 @@ install_eza_from_github() {
     rm -rf "$tmp_dir"
 }
 
+# -- TUI (whiptail) -----------------------------------------------------------
+# Valida que whiptail esté disponible para los menús con checkboxes.
+# Si no está, ofrece instalarlo. Si el usuario rechaza o falla, deja
+# TUI_BACKEND=fallback para que el selector use prompt numerado.
+TUI_BACKEND=""
+
+# Paleta de colores para whiptail (NEWT_COLORS).
+# Fondo negro + acentos cyan/magenta para alto contraste.
+DOTFILES_NEWT_COLORS='
+root=white,black
+window=white,black
+border=brightcyan,black
+title=brightmagenta,black
+textbox=white,black
+listbox=white,black
+actlistbox=black,brightcyan
+actsellistbox=black,brightcyan
+checkbox=brightgreen,black
+actcheckbox=black,brightgreen
+emptyscale=,gray
+fullscale=,brightcyan
+button=black,brightcyan
+compactbutton=white,black
+actbutton=black,brightmagenta
+roottext=lightgray,black
+helpline=brightcyan,black
+disabledentry=gray,black
+'
+
+ensure_tui() {
+    if command_exists whiptail; then
+        TUI_BACKEND="whiptail"
+        export NEWT_COLORS="$DOTFILES_NEWT_COLORS"
+        return 0
+    fi
+
+    print_warning "whiptail no está instalado (necesario para selección con checkboxes)"
+    print_info "Sin whiptail caeremos a un selector numerado en texto plano."
+
+    if ! confirm "¿Instalar whiptail?"; then
+        TUI_BACKEND="fallback"
+        return 0
+    fi
+
+    case "$PKG_MANAGER" in
+        brew)   brew install newt ;;
+        apt)    sudo apt-get update && sudo apt-get install -y whiptail ;;
+        pacman) sudo pacman -S --noconfirm libnewt ;;
+        dnf)    sudo dnf install -y newt ;;
+        *)
+            print_error "PKG_MANAGER no soportado para auto-instalar whiptail"
+            TUI_BACKEND="fallback"
+            return 0
+            ;;
+    esac
+
+    # Limpia caché de PATH del shell por si el binario recién instalado
+    # no es visto inmediatamente por command -v
+    hash -r 2>/dev/null || true
+
+    if command_exists whiptail; then
+        TUI_BACKEND="whiptail"
+        export NEWT_COLORS="$DOTFILES_NEWT_COLORS"
+        print_success "whiptail instalado"
+    else
+        print_warning "whiptail no quedó disponible, usando selector de texto"
+        TUI_BACKEND="fallback"
+    fi
+}
+
 install_tool() {
     # install_tool <binario>
     # Sabe traducir nombre de binario → paquete correcto por OS.

@@ -47,6 +47,11 @@ map cmd+alt+down  neighboring_window down
 map cmd+bracketleft  previous_window
 map cmd+bracketright next_window
 
+# -- Saltar a split por número (overlay) — cmd+shift+space -------------------
+# Pinta números sobre cada split; apretás el número para saltar.
+# Útil con 4+ splits; para 2-3 es más rápido el direccional (cmd+alt+arrows).
+map cmd+shift+space focus_visible_window
+
 # -- Redimensionar splits — cmd+ctrl+arrows ----------------------------------
 map cmd+ctrl+left  resize_window narrower
 map cmd+ctrl+right resize_window wider

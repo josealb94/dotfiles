@@ -40,6 +40,11 @@ map alt+super+down  neighboring_window down
 map alt+bracketleft  previous_window
 map alt+bracketright next_window
 
+# -- Saltar a split por número (overlay) — alt+shift+space -------------------
+# Pinta números sobre cada split; apretás el número para saltar.
+# Útil con 4+ splits; para 2-3 es más rápido el direccional (alt+super+arrows).
+map alt+shift+space focus_visible_window
+
 # -- Redimensionar splits — alt+ctrl+arrows ----------------------------------
 map alt+ctrl+left  resize_window narrower
 map alt+ctrl+right resize_window wider

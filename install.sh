@@ -51,6 +51,13 @@ declare_modules() {
 
         # -- Terminales ------------------------------------------------------
         "ghostty|Ghostty|ready|macos|on|module|Terminales"
+        "kitty|Kitty|ready|linux|off|module|Terminales"
+
+        # -- Tiling WM (Linux X11) -------------------------------------------
+        "bspwm|bspwm + sxhkd (tiling WM)|ready|linux|off|module|Tiling WM"
+        "polybar|Polybar (status bar)|ready|linux|off|module|Tiling WM"
+        "picom|Picom (compositor)|ready|linux|off|module|Tiling WM"
+        "rofi|Rofi (app launcher)|ready|linux|off|module|Tiling WM"
 
         # -- Editores e IDEs -------------------------------------------------
         "visual-studio-code|Visual Studio Code|ready|macos|off|cask|Editores"

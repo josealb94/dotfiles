@@ -9,3 +9,6 @@ dotfiles.conf
 
 # Override OS-específico de Ghostty (symlink creado por ghostty.sh por máquina)
 ghostty/.config/ghostty/config.local
+
+# Override OS-específico de Kitty (symlink creado por kitty.sh por máquina)
+kitty/.config/kitty/kitty.conf.local

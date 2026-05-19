@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# kitty.sh — Módulo de instalación y configuración de Kitty (Linux)
+# kitty.sh — Módulo de instalación y configuración de Kitty (macOS + Linux)
 #
-# Solo Linux. En macOS preferimos Ghostty.
+# La configuración se parte en base + override OS-específico:
+#   kitty/.config/kitty/kitty.conf         → base compartida
+#   kitty/.config/kitty/kitty.conf-linux   → keybinds alt-based + bspwm hints
+#   kitty/.config/kitty/kitty.conf-macos   → keybinds cmd-based + macOS opts
+# kitty_configure crea ~/.config/kitty/kitty.conf.local apuntando al variant.
 # =============================================================================
-
-kitty_require_linux() {
-    if [ "$OS" != "linux" ]; then
-        print_warning "Este módulo está pensado para Linux"
-        print_info "En macOS instalá kitty con: brew install --cask kitty"
-        return 1
-    fi
-}
 
 kitty_get_version() {
     if command_exists kitty; then
@@ -20,34 +16,76 @@ kitty_get_version() {
 }
 
 kitty_install() {
-    print_step "Instalando kitty via ${PKG_MANAGER}..."
-    case "$PKG_MANAGER" in
-        apt)    sudo apt-get install -y kitty ;;
-        pacman) sudo pacman -S --noconfirm kitty ;;
-        dnf)    sudo dnf install -y kitty ;;
+    print_step "Instalando kitty..."
+    case "$OS" in
+        macos)
+            brew install --cask kitty
+            ;;
+        linux)
+            case "$PKG_MANAGER" in
+                apt)    sudo apt-get install -y kitty ;;
+                pacman) sudo pacman -S --noconfirm kitty ;;
+                dnf)    sudo dnf install -y kitty ;;
+                *)
+                    print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"
+                    return 1
+                    ;;
+            esac
+            ;;
         *)
-            print_error "PKG_MANAGER no soportado: ${PKG_MANAGER}"
+            print_error "OS no soportado: ${OS}"
             return 1
             ;;
     esac
 }
 
 kitty_update() {
-    print_step "Actualizando kitty via ${PKG_MANAGER}..."
-    case "$PKG_MANAGER" in
-        apt)    sudo apt-get update && sudo apt-get install -y --only-upgrade kitty ;;
-        pacman) sudo pacman -Syu --noconfirm kitty ;;
-        dnf)    sudo dnf upgrade -y kitty ;;
-        *)
-            print_warning "Actualización automática no disponible para ${PKG_MANAGER}"
-            return 1
+    print_step "Actualizando kitty..."
+    case "$OS" in
+        macos)
+            local output
+            output=$(brew upgrade --cask kitty 2>&1)
+            if echo "$output" | grep -q "already installed"; then
+                print_info "Ya tienes la última versión"
+            else
+                print_success "Kitty actualizado"
+            fi
+            ;;
+        linux)
+            case "$PKG_MANAGER" in
+                apt)    sudo apt-get update && sudo apt-get install -y --only-upgrade kitty ;;
+                pacman) sudo pacman -Syu --noconfirm kitty ;;
+                dnf)    sudo dnf upgrade -y kitty ;;
+                *)
+                    print_warning "Actualización automática no disponible para ${PKG_MANAGER}"
+                    return 1
+                    ;;
+            esac
+            print_success "Kitty actualizado (v$(kitty_get_version))"
             ;;
     esac
-    print_success "Kitty actualizado (v$(kitty_get_version))"
 }
 
 kitty_configure() {
     apply_stow "kitty" || return 1
+
+    # Crear symlink kitty.conf.local → kitty.conf-{macos,linux}.
+    # kitty.conf base referencia `include kitty.conf.local` — el variant
+    # del OS aporta keybinds y opciones específicas de plataforma.
+    local xdg_dir="$HOME/.config/kitty"
+    local config_local="$xdg_dir/kitty.conf.local"
+    local target=""
+    case "$OS" in
+        macos) target="kitty.conf-macos" ;;
+        linux) target="kitty.conf-linux" ;;
+    esac
+
+    if [ -n "$target" ] && [ -f "$xdg_dir/$target" ]; then
+        ln -sf "$target" "$config_local"
+        print_success "Override ${OS} aplicado: kitty.conf.local → ${target}"
+    else
+        print_warning "No se encontró ${target} en ${xdg_dir}"
+    fi
 
     # Verificar la fuente configurada en kitty.conf
     local kitty_config="$DOTFILES_DIR/kitty/.config/kitty/kitty.conf"
@@ -70,8 +108,6 @@ kitty_main() {
     echo ""
     print_section "Terminal — Kitty"
     echo ""
-
-    kitty_require_linux || return 0
 
     local version
     version=$(kitty_get_version)

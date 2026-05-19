@@ -1,0 +1,60 @@
+# =============================================================================
+# Kitty — Override macOS
+# Cargado vía symlink ~/.config/kitty/kitty.conf.local creado por kitty.sh
+#
+# Mapeo de teclado (HyperX con swap Option↔Command en macOS):
+#   tecla física Alt (junto al espacio) → cmd    (= Linux alt)
+#   tecla física Cmd (Win)              → opt    (= Linux super)
+#   ctrl                                → ctrl
+#
+# Por lo tanto los keybinds en esta config usan `cmd+X` como modificador
+# principal (espejo físico del `alt+X` en Linux) — idéntico a la config
+# de Ghostty macOS, presionás la misma tecla física en ambos OS.
+# =============================================================================
+
+# -- macOS-specific options ---------------------------------------------------
+# Tratar la tecla Option como Alt (necesario para que combos cmd+alt+X y
+# atajos Alt+C de fzf, etc., funcionen como en Linux).
+macos_option_as_alt yes
+
+# Color del titlebar — sigue el background del tema (Catppuccin Mocha).
+macos_titlebar_color background
+
+# =============================================================================
+# Keybindings — equivalentes físicos a Ghostty macOS
+# =============================================================================
+
+# -- Splits — cmd+d (vertical), cmd+shift+d (horizontal) ---------------------
+map cmd+d         launch --location=vsplit --cwd=current
+map cmd+shift+d   launch --location=hsplit --cwd=current
+
+# -- Zoom de split — cmd+shift+enter (toggle layout a stack) -----------------
+map cmd+shift+enter toggle_layout stack
+
+# -- Navegar splits direccionalmente — cmd+alt+arrows ------------------------
+# Espejo físico de alt+super+arrows en Linux.
+map cmd+alt+left  neighboring_window left
+map cmd+alt+right neighboring_window right
+map cmd+alt+up    neighboring_window up
+map cmd+alt+down  neighboring_window down
+
+# -- Navegar splits secuencialmente — cmd+[ / cmd+] --------------------------
+map cmd+bracketleft  previous_window
+map cmd+bracketright next_window
+
+# -- Redimensionar splits — cmd+ctrl+arrows ----------------------------------
+map cmd+ctrl+left  resize_window narrower
+map cmd+ctrl+right resize_window wider
+map cmd+ctrl+up    resize_window taller
+map cmd+ctrl+down  resize_window shorter
+
+# -- Igualar splits — cmd+ctrl+= ---------------------------------------------
+map cmd+ctrl+equal resize_window reset
+
+# -- Tabs — cmd+t / cmd+w ----------------------------------------------------
+map cmd+t new_tab_with_cwd
+map cmd+w close_window
+
+# -- Recargar/editar config — cmd+shift+r / cmd+shift+e ----------------------
+map cmd+shift+r load_config_file
+map cmd+shift+e edit_config_file

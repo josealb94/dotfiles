@@ -1,0 +1,58 @@
+# =============================================================================
+# Kitty — Override Linux (X11 / Wayland)
+# Cargado vía symlink ~/.config/kitty/kitty.conf.local creado por kitty.sh
+#
+# Mapeo de teclado (HyperX sin swap en Linux):
+#   tecla física Alt (junto al espacio) → alt    (= macOS cmd con swap)
+#   tecla física Win                    → super  (= macOS opt con swap)
+#   ctrl                                → ctrl
+#
+# FILOSOFÍA — separación de responsabilidades para no chocar con bspwm:
+#   alt+X         → kitty (acciones del terminal)
+#   super+X       → bspwm (acciones del window manager, lo configuramos después)
+#   alt+super+X   → kitty (split nav direccional, único combo compartido)
+#
+# RESERVAS PARA bspwm/sxhkd (a respetar cuando lo configuremos):
+#   - NO usar super+alt+X en sxhkd: kitty necesita ese mask para navegar
+#     splits direccionalmente (alt+super+arrows). Si bspwm graba ese combo,
+#     gana porque sxhkd intercepta antes que kitty.
+#   - Para "preselect direction" en bspwm usar super+ctrl+arrows.
+#   - Para "resize node" en bspwm usar super+ctrl+arrows o super+shift+arrows.
+# =============================================================================
+
+# -- Splits — alt+d (vertical), alt+shift+d (horizontal) ---------------------
+map alt+d         launch --location=vsplit --cwd=current
+map alt+shift+d   launch --location=hsplit --cwd=current
+
+# -- Zoom de split — alt+shift+enter (toggle layout a stack) -----------------
+map alt+shift+enter toggle_layout stack
+
+# -- Navegar splits direccionalmente — alt+super+arrows ----------------------
+# Equivalente a cmd+alt+arrows en macOS.
+# Este es el único combo que comparte modificador con super → reserva
+# para bspwm: no usar super+alt+X en sxhkd.
+map alt+super+left  neighboring_window left
+map alt+super+right neighboring_window right
+map alt+super+up    neighboring_window up
+map alt+super+down  neighboring_window down
+
+# -- Navegar splits secuencialmente — alt+[ / alt+] --------------------------
+map alt+bracketleft  previous_window
+map alt+bracketright next_window
+
+# -- Redimensionar splits — alt+ctrl+arrows ----------------------------------
+map alt+ctrl+left  resize_window narrower
+map alt+ctrl+right resize_window wider
+map alt+ctrl+up    resize_window taller
+map alt+ctrl+down  resize_window shorter
+
+# -- Igualar splits — alt+ctrl+= ---------------------------------------------
+map alt+ctrl+equal resize_window reset
+
+# -- Tabs — alt+t / alt+w ----------------------------------------------------
+map alt+t new_tab_with_cwd
+map alt+w close_window
+
+# -- Recargar/editar config — alt+shift+r / alt+shift+e ----------------------
+map alt+shift+r load_config_file
+map alt+shift+e edit_config_file

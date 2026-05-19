@@ -50,8 +50,8 @@ declare_modules() {
         "nvim|Neovim + LazyVim|ready|both|on|module|Esenciales"
 
         # -- Terminales ------------------------------------------------------
-        "ghostty|Ghostty|ready|macos|on|module|Terminales"
-        "kitty|Kitty|ready|linux|off|module|Terminales"
+        "kitty|Kitty|ready|both|on|module|Terminales"
+        "ghostty|Ghostty|ready|macos|off|module|Terminales"
 
         # -- Tiling WM (Linux X11) -------------------------------------------
         "bspwm|bspwm + sxhkd (tiling WM)|ready|linux|off|module|Tiling WM"

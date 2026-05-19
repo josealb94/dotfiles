@@ -60,6 +60,20 @@ map cmd+ctrl+equal resize_window reset
 map cmd+t new_tab_with_cwd
 map cmd+w close_window
 
+# -- Renombrar tab — cmd+shift+i ---------------------------------------------
+map cmd+shift+i set_tab_title
+
+# -- Saltar a tab por número — cmd+1..9 --------------------------------------
+map cmd+1 goto_tab 1
+map cmd+2 goto_tab 2
+map cmd+3 goto_tab 3
+map cmd+4 goto_tab 4
+map cmd+5 goto_tab 5
+map cmd+6 goto_tab 6
+map cmd+7 goto_tab 7
+map cmd+8 goto_tab 8
+map cmd+9 goto_tab 9
+
 # -- Recargar/editar config — cmd+shift+r / cmd+shift+e ----------------------
 map cmd+shift+r load_config_file
 map cmd+shift+e edit_config_file

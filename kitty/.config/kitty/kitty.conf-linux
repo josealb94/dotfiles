@@ -53,6 +53,20 @@ map alt+ctrl+equal resize_window reset
 map alt+t new_tab_with_cwd
 map alt+w close_window
 
+# -- Renombrar tab — alt+shift+i ---------------------------------------------
+map alt+shift+i set_tab_title
+
+# -- Saltar a tab por número — alt+1..9 --------------------------------------
+map alt+1 goto_tab 1
+map alt+2 goto_tab 2
+map alt+3 goto_tab 3
+map alt+4 goto_tab 4
+map alt+5 goto_tab 5
+map alt+6 goto_tab 6
+map alt+7 goto_tab 7
+map alt+8 goto_tab 8
+map alt+9 goto_tab 9
+
 # -- Recargar/editar config — alt+shift+r / alt+shift+e ----------------------
 map alt+shift+r load_config_file
 map alt+shift+e edit_config_file

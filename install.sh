@@ -188,8 +188,9 @@ select_modules() {
     SELECTED_MODULES=()
     ensure_tui
 
-    local available
-    readarray -t available < <(modules_for_os)
+    local available=()
+    local line
+    while IFS= read -r line; do available+=("$line"); done < <(modules_for_os)
 
     if [ ${#available[@]} -eq 0 ]; then
         print_warning "No hay módulos disponibles para ${OS}"
@@ -379,8 +380,8 @@ show_menu() {
     print_section "Selecciona una herramienta para configurar (${OS})"
     echo ""
 
-    local available entry desc status category prev_category=""
-    readarray -t available < <(modules_for_os)
+    local available=() entry desc status category prev_category="" line
+    while IFS= read -r line; do available+=("$line"); done < <(modules_for_os)
     local i=1
 
     for entry in "${available[@]}"; do
@@ -542,8 +543,9 @@ main() {
                 ;;
             *)
                 if echo "$choice" | grep -qE '^[0-9]+$'; then
-                    local available
-                    readarray -t available < <(modules_for_os)
+                    local available=()
+                    local line
+                    while IFS= read -r line; do available+=("$line"); done < <(modules_for_os)
                     local idx=$((choice - 1))
                     if [ $idx -ge 0 ] && [ $idx -lt ${#available[@]} ]; then
                         local entry="${available[$idx]}"

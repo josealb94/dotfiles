@@ -3,22 +3,23 @@
 # Docs: https://starship.rs/config/
 # =============================================================================
 
-# Esquema general del prompt
+# Esquema general del prompt — 2 líneas con esquinas
 format = """
+[╭─](bold teal)\
+$username\
+$hostname\
 $directory\
 $git_branch\
 $git_status\
 $nodejs\
-$golang\
 $python\
+$golang\
 $rust\
-$java\
 $docker_context\
 $aws\
-$package\
 $cmd_duration\
 $line_break\
-$character"""
+[╰─](bold teal)$character"""
 
 # Segundo de espera antes de chequear archivos (performance)
 scan_timeout = 30
@@ -51,6 +52,19 @@ base = "#1e1e2e"
 [character]
 success_symbol = "[➜](bold teal)"
 error_symbol = "[➜](bold red)"
+
+# -- SSH guard ----------------------------------------------------------------
+# Mostrar usuario + hostname SOLO al conectarse por SSH (anti "ejecuté en server")
+[username]
+style_user = "bold yellow"
+style_root = "bold red"
+format = "[$user]($style)"
+show_always = false
+
+[hostname]
+ssh_only = true
+trim_at = "."
+format = "@[$hostname](bold yellow) "
 
 # -- Directorio ---------------------------------------------------------------
 [directory]
@@ -98,10 +112,6 @@ format = "via [🐍 $version]($style) "
 style = "bold peach"
 format = "via [🦀 $version]($style) "
 
-[java]
-style = "bold red"
-format = "via [☕ $version]($style) "
-
 # -- Docker -------------------------------------------------------------------
 [docker_context]
 style = "bold sapphire"
@@ -112,11 +122,6 @@ only_with_files = true
 [aws]
 style = "bold peach"
 format = "on [☁️  $profile($region)]($style) "
-
-# -- Package ------------------------------------------------------------------
-[package]
-style = "bold peach"
-format = "is [📦 $version]($style) "
 
 # -- Tiempo de ejecución ------------------------------------------------------
 [cmd_duration]

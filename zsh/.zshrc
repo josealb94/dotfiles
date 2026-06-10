@@ -48,13 +48,6 @@ setopt HIST_REDUCE_BLANKS
 HISTSIZE=50000
 SAVEHIST=50000
 
-# -- Línea separadora de color (indicador visual de split activo) -------------
-_prompt_separator() {
-    local cols=${COLUMNS:-80}
-    printf '\033[36m%*s\033[0m\n' "$cols" '' | tr ' ' '─'
-}
-precmd_functions+=(_prompt_separator)
-
 # -- Autocompletado mejorado --------------------------------------------------
 # Case-insensitive: cd doc<Tab> encuentra Documents
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'

@@ -46,6 +46,7 @@ declare_modules() {
         # -- Esenciales — CLI básico -----------------------------------------
         "zsh|Zsh + Oh My Zsh|ready|both|on|module|Esenciales"
         "git|Git (aliases, config)|ready|both|on|module|Esenciales"
+        "gh|GitHub CLI (gh)|ready|both|off|module|Esenciales"
         "fzf|fzf (búsqueda en terminal)|ready|both|on|module|Esenciales"
         "nvim|Neovim + LazyVim|ready|both|on|module|Esenciales"
 

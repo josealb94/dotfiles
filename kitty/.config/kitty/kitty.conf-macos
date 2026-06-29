@@ -13,9 +13,11 @@
 # =============================================================================
 
 # -- macOS-specific options ---------------------------------------------------
-# Tratar la tecla Option como Alt (necesario para que combos cmd+alt+X y
-# atajos Alt+C de fzf, etc., funcionen como en Linux).
-macos_option_as_alt yes
+# Tratar la Option izquierda como Alt (combos cmd+alt+X y atajos Alt+C de
+# fzf, etc., siguen funcionando con la izquierda). La derecha queda nativa
+# para tipear caracteres especiales en layouts no-ingleses (Opt+Q = @ en
+# teclado español, etc).
+macos_option_as_alt left
 
 # Color del titlebar — sigue el background del tema (Catppuccin Mocha).
 macos_titlebar_color background

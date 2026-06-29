@@ -66,7 +66,7 @@ section "HINTS" "selección sin mouse — apretás, soltás, apretás la segunda
 kv "Ctrl+Shift+E"             "Abrir URL en browser"
 kv "Ctrl+Shift+P  →  U"       "Copiar URL"
 kv "Ctrl+Shift+P  →  P"       "Copiar path"
-kv "Ctrl+Shift+P  →  L"       "Copiar línea entera"
+kv "Ctrl+Shift+P  →  L"       "Copiar línea (trim espacios laterales)"
 kv "Ctrl+Shift+P  →  W"       "Copiar palabra"
 kv "Ctrl+Shift+P  →  H"       "Copiar hash (commit/sha)"
 kv "Ctrl+Shift+P  →  N"       "Copiar file:line"

@@ -103,7 +103,7 @@ section "VENTANA / CONFIG"
 os_header
 os_row "Recargar config"         "Cmd+Shift+R"        "Alt+Shift+R"
 os_row "Editar config"           "Cmd+Shift+E"        "Alt+Shift+E"
-os_row "Mostrar este cheatsheet" "Ctrl+Shift+/"       "Ctrl+Shift+/"
+os_row "Mostrar este cheatsheet" "Ctrl+Shift+/ / F1"  "Ctrl+Shift+/ / F1"
 echo
 note "Opacity multi-step:  Ctrl+Shift+A  →  m (más) / l (menos) / 1 (100%) / d (default)"
 

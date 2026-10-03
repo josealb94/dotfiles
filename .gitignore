@@ -12,3 +12,4 @@ ghostty/.config/ghostty/config.local
 
 # Override OS-específico de Kitty (symlink creado por kitty.sh por máquina)
 kitty/.config/kitty/kitty.conf.local
+opencode/.local/share/opencode/auth.json

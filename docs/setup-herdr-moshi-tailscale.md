@@ -55,17 +55,71 @@ No continuar hasta que el SSH entre.
 
 ## Paso 2 — SSH endurecido en el host
 
-En `/etc/ssh/sshd_config` del Mac Mini:
+Tres capas distintas, y conviene cerrarlas en este orden.
 
-```
-PasswordAuthentication no
-PermitRootLogin no
-```
+### 2.1 — Quién puede intentar entrar
+
+Ajustes del Sistema → General → **Compartir** → *Inicio de sesión remoto* (botón ⓘ):
+
+- **Allow access for** → `Only these users` → **Administrators** (no "All users")
+- **Allow full disk access for remote users** → **OFF**
+
+Esa segunda casilla es la que más importa una vez que hay un teléfono entrando por SSH:
+encendida, le da a la sesión remota acceso a **todo el disco** saltándose TCC —Fotos,
+Mensajes, Correo, Contactos, Calendario, backups—. Para mirar agentes, aprobar y revisar
+código no hace falta nada de eso, y apagarla no afecta a `herdr`, `git` ni a los proyectos.
+
+Verificación por CLI de quién quedó habilitado:
 
 ```bash
-ssh-copy-id tu-usuario@mac-mini
-sudo launchctl kickstart -k system/com.openssh.sshd    # recargar sshd en macOS
+dscl . -read /Groups/com.apple.access_ssh          # NestedGroups → admin
+dscl . -read /Groups/admin GroupMembership
 ```
+
+### 2.2 — Con qué se puede autenticar
+
+Un drop-in, que se relee en **cada conexión nueva**: no hay que reiniciar `sshd` y la
+sesión en curso no se corta.
+
+```bash
+sudo tee /etc/ssh/sshd_config.d/200-local.conf >/dev/null <<'CONF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+CONF
+```
+
+`KbdInteractiveAuthentication no` **no es redundante**: macOS trae `UsePAM yes`, y PAM
+puede aceptar una contraseña por esa otra vía aunque `PasswordAuthentication` esté en
+`no`. Sin esa línea el endurecimiento queda a medias.
+
+Comprobar que quedó aplicado, y recién entonces probar que el teléfono sigue entrando:
+
+```bash
+sudo /usr/sbin/sshd -T | grep -iE '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin)'
+# las tres deben decir: no
+```
+
+Rollback, si hiciera falta: `sudo rm /etc/ssh/sshd_config.d/200-local.conf`.
+
+> ⚠️ **Sin contraseña, cada dispositivo nuevo necesita su clave antes de poder entrar.**
+> `ssh-copy-id usuario@host` desde la máquina nueva *antes* de endurecer, o pegar la clave
+> a mano en `~/.ssh/authorized_keys` con acceso físico al host.
+
+### 2.3 — Lo que NO se puede cerrar en macOS
+
+`sshd` lo lanza launchd, que es **dueño del socket**, así que `ListenAddress` en
+`sshd_config` **se ignora**: el puerto 22 queda escuchando en `*:22`, en todas las
+interfaces, no solo en la del tailnet.
+
+```text
+tcp4  *.22  *.*  LISTEN
+```
+
+Limitarlo exigiría tocar el plist (protegido por SIP) o reglas de `pf` — desproporcionado
+para un equipo personal. La mitigación real es la de 2.2: si no hay contraseña que
+adivinar, que el puerto se vea importa poco. En casa el riesgo es bajo porque el router no
+lo reenvía; donde sí cuenta es en WiFi de cafés y coworkings.
 
 > **No activar Tailscale SSH.** Secuestra el puerto 22 con autenticación gestionada por
 > Tailscale y rompe la autenticación por clave que Moshi necesita. Lo que se quiere es

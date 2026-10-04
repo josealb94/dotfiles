@@ -68,6 +68,9 @@ declare_modules() {
         "docker|Docker Desktop|ready|macos|off|cask|Editores"
         "postman|Postman|ready|macos|off|cask|Editores"
 
+        # -- Red -------------------------------------------------------------
+        "tailscale|Tailscale (red mesh privada)|ready|both|off|module|Red"
+
         # -- IA --------------------------------------------------------------
         "claude|Claude (desktop)|ready|macos|on|cask|IA"
         "CUSTOM_claude_code|Claude Code (CLI)|ready|macos|on|cask|IA"
@@ -75,6 +78,8 @@ declare_modules() {
         "ollama-app|Ollama (app)|ready|macos|off|cask|IA"
         "opencode-desktop|OpenCode (desktop)|ready|macos|off|cask|IA"
         "opencode|OpenCode + Ollama (CLI local)|ready|both|off|module|IA"
+        "herdr|Herdr (multiplexor de agentes)|ready|both|off|module|IA"
+        "moshi|Moshi hook (agentes en el celular)|ready|both|off|module|IA"
 
         # -- Productividad ---------------------------------------------------
         "raycast|Raycast|ready|macos|off|cask|Productividad"

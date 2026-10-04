@@ -1,0 +1,112 @@
+onboarding = false
+# =============================================================================
+# Herdr — multiplexor de agentes de coding
+# Docs: https://herdr.dev/docs  ·  ruta resuelta: herdr --help
+# Referencia completa de atajos: vault → dev-tools/keybindings/herdr.md
+# =============================================================================
+
+[keys]
+# Prefijo por defecto: ctrl+b
+#
+# Conflictos conocidos de ctrl+b:
+#   - tmux usa el mismo prefijo → NO anidar Herdr dentro de tmux
+#   - vim/Neovim: ctrl+b es página-arriba (no aplica si se revisa en VS Code)
+#   - shell: se pierde backward-char (las flechas lo cubren)
+#
+# Con kitty NO hay conflicto: sus atajos viven en Cmd+* (macOS) / Alt+* (Linux)
+# y kitty los captura antes de que lleguen a la aplicación.
+#
+# Para cambiarlo:
+# prefix = "ctrl+space"                  # ojo: en macOS cambia la fuente de entrada
+# prefix = ["ctrl+b", "ctrl+space"]      # admite varios a la vez
+
+# -- Acciones sin binding por defecto que sí conviene tener -------------------
+# Esquema vim-style, consistente con prefix+h/j/k/l que mueve el foco entre panes
+previous_workspace = "prefix+shift+h"
+next_workspace     = "prefix+shift+l"
+previous_agent     = "prefix+shift+k"
+next_agent         = "prefix+shift+j"
+
+# Volver al pane anterior, estilo alt-tab
+last_pane = "prefix+space"
+
+# Limpiar el pane
+clear_pane = "prefix+ctrl+k"
+
+# Redimensionar sin entrar en modo resize (prefix+r)
+resize_pane_left  = "ctrl+shift+alt+left"
+resize_pane_down  = "ctrl+shift+alt+down"
+resize_pane_up    = "ctrl+shift+alt+up"
+resize_pane_right = "ctrl+shift+alt+right"
+
+# =============================================================================
+# Índices directos — saltar al elemento N sin pasar por el prefijo
+# =============================================================================
+# Se usa la sintaxis moderna de rango sobre las acciones. NO se usa la sección
+# [keys.indexed], que la propia doc marca como legacy:
+#   "Prefer switch_tab, switch_workspace, and focus_agent for new configs."
+#
+# Verificado contra la config de kitty de este repo (2026-10-03):
+#
+#   ctrl+1..9        libre en macOS y Linux
+#   ctrl+shift+1..9  libre en macOS y Linux
+#   ctrl+alt+1..9    libre en macOS y Linux
+#
+#   alt+1..9         ❌ DESCARTADO: kitty.conf-linux lo mapea a "ir a tab 1..9".
+#                       Funcionaría en macOS pero rompería en Linux.
+#
+# kitty no trae NINGÚN binding por defecto con números (verificado contra sus
+# propias definiciones), así que el único riesgo eran los mapeos propios.
+switch_tab       = ["prefix+1..9", "ctrl+1..9"]
+switch_workspace = "ctrl+shift+1..9"
+focus_agent      = "ctrl+alt+1..9"
+
+# =============================================================================
+# UI
+# =============================================================================
+# Ojo con TOML: las claves sueltas de [ui] van ANTES de cualquier [ui.xxx].
+[ui]
+# Indicadores de estado: "dots" distingue solo por color; "symbols" usa glifos
+# distintos para blocked / working / done / idle / unknown. Con 5 estados, la
+# forma se reconoce de reojo; el color hay que decodificarlo.
+status_indicators = "symbols"
+
+# Panel de agentes: "spaces" agrupa por workspace · "priority" es cola de
+# atención (el que te necesita, primero). Pasar a "priority" con 3+ agentes.
+agent_panel_sort = "spaces"
+
+# -- Filas del sidebar --------------------------------------------------------
+# Muestra la rama de git en el sidebar, sin entrar al pane.
+# Piezas: state_icon, state_text, workspace, branch, git_status
+# Nota: git_status muestra commits ahead/behind del remoto, NO archivos sucios.
+[ui.sidebar.spaces]
+rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+
+# -- Notificaciones -----------------------------------------------------------
+# Vienen en "off" por defecto. Para el flujo de "asignar tareas y estar
+# pendiente", esto es lo que evita tener que volver a mirar.
+#   off      · sin notificaciones
+#   herdr    · toast dentro de la app
+#   terminal · le pide al emulador una notificación de escritorio  ← elegido
+#   system   · le pide directo al servicio de notificaciones del SO
+# Se eligió "terminal" porque kitty ya maneja las notificaciones de Claude Code
+# y así se respeta su configuración.
+[ui.toast]
+delivery = "terminal"
+delay_seconds = 1
+
+# =============================================================================
+# Servidor
+# =============================================================================
+# Tamaño del terminal virtual cuando NO hay ningún cliente adjunto.
+# Los clientes adjuntos siempre usan su propio tamaño — Herdr NO encoge al
+# cliente más chico como hace tmux, así que iPhone + iPad + laptop pueden estar
+# adjuntos a la vez sin pelearse por la geometría.
+#
+# El default (120x40) es angosto para un ultrawide: si te desadjuntas y dejas a
+# un agente trabajando, su salida se envuelve a 120 columnas y al volver la ves
+# cortada. Estos valores son los de kitty a pantalla completa en el 2560x1080
+# con JetBrainsMono 14 (medido con `herdr api snapshot` → area).
+[server]
+headless_cols = 257
+headless_rows = 65

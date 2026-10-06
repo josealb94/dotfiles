@@ -165,7 +165,7 @@ note "Conectar el iPad no desconecta el teléfono — nadie pierde su sesión."
 note "Verificado: 2 clientes del iPhone adjuntos y el área siguió en 257x65."
 echo
 note "El único riesgo: dos clientes en el MISMO pane → las teclas se intercalan."
-note "    Solución: un dispositivo por workspace (ctrl+shift+1..9)."
+note "    Solucion: un dispositivo por workspace (ctrl+1..9)."
 note "mosh deja su proceso vivo al cerrar la app (~25 MB por cliente):"
 note "    salí con prefix+q para no acumular procesos huérfanos."
 echo
@@ -189,13 +189,22 @@ kv "prefix+shift+k / +j"      "Agente anterior / siguiente"
 kv "prefix+space"             "Volver al pane anterior (alt-tab)"
 kv "ctrl+shift+alt+arrows"    "Redimensionar sin modo resize"
 echo
-note "── Índices DIRECTOS (sin prefijo) ──"
-kv "ctrl+1..9"                "Ir a tab N"
-kv "ctrl+shift+1..9"          "Ir a workspace N"
-kv "ctrl+alt+1..9"            "Enfocar agente N"
+note "── Índices por número ──"
+kv "ctrl+1..9"                "Ir a WORKSPACE N  (directo, sin prefijo)"
+kv "prefix+1..9"              "Ir a tab N"
+kv "prefix+shift+1..9"        "Ir a workspace N"
+kv "prefix+alt+1..9"          "Enfocar agente N"
 echo
-note "Elegidos tras verificar que NO chocan con kitty en macOS ni en Linux."
-note "alt+1..9 se descartó: en Linux kitty ya lo usa para ir a tab."
+note "Solo ctrl+1..9 funciona sin prefijo: shift y alt rompen la codificacion"
+note "    del digito en el terminal (shift+1 es '!'), y la tecla no llega."
+note "Se le dio a workspaces porque son 7; los tabs casi siempre son 1."
+note "alt+1..9 se descarto aparte: en Linux kitty ya lo usa para ir a tab."
+echo
+note "En macOS quedan separados:  cmd+1..9 = tabs de KITTY  ·  ctrl+1..9 = workspaces de HERDR"
+echo
+note "ctrl+option esta RESERVADO para Wispr Flow (dictado) - no asignarlo aqui."
+note "    Si Wispr deja de responder: revisa que VoiceOver no se haya activado"
+note "    con Cmd+F5 - su modificador tambien es ctrl+option."
 echo
 note "Con foco en el sidebar NO se usa prefijo:  ↑ ↓ mueven workspace · h j k l mueven pane"
 note "Choca con tmux (mismo ctrl+b) — no anidarlos. Con kitty (Cmd+*) no hay conflicto."

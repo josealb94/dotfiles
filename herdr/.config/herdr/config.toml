@@ -40,26 +40,52 @@ resize_pane_up    = "ctrl+shift+alt+up"
 resize_pane_right = "ctrl+shift+alt+right"
 
 # =============================================================================
-# Índices directos — saltar al elemento N sin pasar por el prefijo
+# Índices por número
 # =============================================================================
-# Se usa la sintaxis moderna de rango sobre las acciones. NO se usa la sección
-# [keys.indexed], que la propia doc marca como legacy:
-#   "Prefer switch_tab, switch_workspace, and focus_agent for new configs."
+# Dos chequeos SEPARADOS, y conviene no mezclarlos:
+#   "libre"    → ninguna otra app usa el atajo
+#   "funciona" → el terminal sabe transmitirlo y le llega a Herdr
 #
-# Verificado contra la config de kitty de este repo (2026-10-03):
-#
+# -- Libre: verificado contra la config de kitty de este repo (2026-10-03) ----
 #   ctrl+1..9        libre en macOS y Linux
 #   ctrl+shift+1..9  libre en macOS y Linux
 #   ctrl+alt+1..9    libre en macOS y Linux
-#
-#   alt+1..9         ❌ DESCARTADO: kitty.conf-linux lo mapea a "ir a tab 1..9".
-#                       Funcionaría en macOS pero rompería en Linux.
-#
+#   alt+1..9         ❌ kitty.conf-linux lo mapea a "ir a tab". Descartado.
+#   cmd+1..9         ❌ kitty.conf-macos lo mapea a "ir a tab". Descartado.
 # kitty no trae NINGÚN binding por defecto con números (verificado contra sus
 # propias definiciones), así que el único riesgo eran los mapeos propios.
-switch_tab       = ["prefix+1..9", "ctrl+1..9"]
-switch_workspace = "ctrl+shift+1..9"
-focus_agent      = "ctrl+alt+1..9"
+#
+# -- Funciona: probado a mano en la máquina (2026-10-06) ----------------------
+#   ctrl+1..9        ✅
+#   ctrl+shift+1..9  ❌ no llega
+#   ctrl+alt+1..9    ❌ no llega
+# Causa probable: la codificación del terminal. shift+1 produce "!", así que se
+# pierde la identidad del dígito; ctrl+alt+1 cae en lo mismo. ctrl+1 sobrevive
+# porque no altera el carácter base.
+#
+# Se probó también la sección [keys.indexed] — la diseñada para índices
+# directos, con ejemplos literales tabs="ctrl", workspaces="ctrl+shift" — y
+# TAMPOCO registra ctrl+shift. Se descartó y no quedó en este archivo.
+#
+# ⚠️ `herdr config check` valida SINTAXIS, no que la tecla llegue: dijo
+#    "config: ok" para los tres. Todo binding nuevo se prueba a mano.
+#
+# -- La asignación resultante -------------------------------------------------
+# Hay un solo índice directo que funciona, así que va a lo que más se navega.
+# Medido con `herdr api snapshot`: 7 workspaces, máximo 2 tabs por workspace y
+# 6 de 7 con un único tab. Gastarlo en tabs era desperdiciarlo.
+#
+# En macOS queda una separación limpia:
+#   cmd+1..9   → tabs de kitty
+#   ctrl+1..9  → workspaces de Herdr
+#
+# ctrl+alt queda SIN asignar A PROPÓSITO: ese atajo es para Wispr Flow (dictado).
+# Si Wispr deja de responder, revisar que VoiceOver no se haya activado con
+# ⌘F5: su modificador también es ctrl+option.
+switch_workspace = ["prefix+shift+1..9", "ctrl+1..9"]
+switch_tab       = "prefix+1..9"
+focus_agent      = "prefix+alt+1..9"
+# ctrl+alt queda SIN asignar a propósito: ese atajo es para Wispr Flow.
 
 # =============================================================================
 # UI

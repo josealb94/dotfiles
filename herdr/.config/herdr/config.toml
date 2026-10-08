@@ -101,12 +101,42 @@ status_indicators = "symbols"
 # atención (el que te necesita, primero). Pasar a "priority" con 3+ agentes.
 agent_panel_sort = "spaces"
 
+# Color de acento: bordes, resaltados y navegación.
+# #89b4fa es el "blue" de Catppuccin Mocha, el mismo tema que usa kitty.
+accent = "#89b4fa"
+
 # -- Filas del sidebar --------------------------------------------------------
 # Muestra la rama de git en el sidebar, sin entrar al pane.
 # Piezas: state_icon, state_text, workspace, branch, git_status
 # Nota: git_status muestra commits ahead/behind del remoto, NO archivos sucios.
 [ui.sidebar.spaces]
-rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+# row_gap 0 = compacto. Con 8+ workspaces el aire cuesta visibilidad.
+row_gap = 0
+# Cada token se puede estilar por separado: { token = "x", fg = "#rrggbb",
+# bold = true, dim = true }. Los campos omitidos conservan el default.
+#
+# Ojo: estilar un token con algo parecido a su default no cambia nada visible.
+# Para que la segunda línea se distinga de verdad hace falta otro TONO, no otro
+# gris. Paleta Catppuccin Mocha, la misma de kitty.
+rows = [
+  ["state_icon", { token = "workspace", bold = true }],
+  [
+    { token = "branch",     fg = "#94e2d5" },   # teal: se separa del gris
+    { token = "git_status", fg = "#f9e2af" },   # yellow: solo aparece si hay ahead/behind
+  ],
+]
+
+# Panel de agentes. El default muestra "claude" debajo de cada uno, que con
+# ocho agentes del mismo tipo no dice nada; terminal_title_stripped muestra
+# en qué está trabajando cada uno.
+# Este se deja apagado a propósito: es texto largo y el nombre debe seguir
+# mandando en la lectura.
+[ui.sidebar.agents]
+row_gap = 0
+rows = [
+  ["state_icon", { token = "workspace", bold = true }],
+  [{ token = "terminal_title_stripped", fg = "#9399b2" }],
+]
 
 # -- Notificaciones -----------------------------------------------------------
 # Vienen en "off" por defecto. Para el flujo de "asignar tareas y estar
@@ -136,3 +166,54 @@ delay_seconds = 1
 [server]
 headless_cols = 257
 headless_rows = 65
+
+# =============================================================================
+# Tema
+# =============================================================================
+[theme]
+# Integrados: catppuccin, terminal, tokyo-night, dracula, nord, gruvbox,
+#             one-dark, solarized, kanagawa, rose-pine, vesper
+# Es el default, pero se deja explícito: kitty usa Catppuccin Mocha y así
+# los dos quedan atados a la misma decisión.
+name = "catppuccin"
+
+[theme.custom]
+# Los panes heredan el fondo del terminal, así se respeta el
+# background_opacity 0.88 de kitty donde está el contenido.
+panel_bg = "reset"
+
+# El sidebar SÍ lleva fondo propio, un escalón más oscuro que los panes.
+# Así se lee como una zona aparte en vez de confundirse con el contenido.
+# Paleta Catppuccin Mocha:
+#   mantle   #181825  un paso bajo el fondo de kitty (#1e1e2e = base)
+#   malva    #494060  base mezclada 25% con el mauve de Catppuccin (#cba6f7)
+#   selección #3d3652  el mismo malva, más suave que la fila activa
+#
+# La fila activa usa MALVA y no un gris: así se distingue por color además de
+# por claridad, que es lo que costaba antes. Al ser el violeta propio de
+# Catppuccin se integra sin desentonar, y al no ser verde ni rojo no compite
+# con los iconos de estado de los agentes.
+#
+# Escala para subir o bajar la intensidad (mezcla de #1e1e2e con #cba6f7):
+#   #302d41  muy sutil, casi no se nota sobre los panes
+#   #38324c  15%  sutil
+#   #494060  25%  visible      <-- elegido
+#   #5b4e74  35%  marcado
+#   #6c5b88  45%  fuerte
+#
+# Sobre por qué la SELECCIÓN es más suave que la fila activa, probado con
+# prefix+w: en el picker la selección no compite contra la fila activa sino
+# contra las filas NO seleccionadas, que están casi al nivel del fondo. Un
+# tono fuerte ahí resulta un bloque que encandila. 18% es el punto medio
+# entre el fondo y el 35% que se probó primero.
+# Las dos en el mismo tono: se diferencian por intensidad, no por color.
+#
+# ALTERNATIVA si distinguirlas cuesta: devolver la selección a un gris neutro
+#   selection_bg = "#45475a"   # surface1
+# Pasa a diferenciarse por TONO (gris vs malva) en vez de por brillo, que es
+# más fácil de leer de reojo, al precio de que las dos dejen de ser la misma
+# familia. Se probó el 2026-10-07 y se eligió la escala única; queda acá por
+# si el uso diario dice lo contrario.
+sidebar_bg    = "#181825"
+active_row_bg = "#494060"
+selection_bg  = "#3d3652"

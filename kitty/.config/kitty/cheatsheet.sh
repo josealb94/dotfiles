@@ -236,6 +236,14 @@ echo
 note "Logs en ~/.config/herdr/ · config en ~/.config/herdr/config.toml (symlink al repo)"
 note "Referencia completa en el vault: dev-tools/keybindings/herdr.md"
 
+section "CLAUDE CODE" "prompt de la CLI"
+kv "Ctrl+G"                   "Abrir el prompt en VS Code (guardar y cerrar = vuelve)"
+echo
+note "Wispr Flow pega el dictado y Claude Code lo oculta como [Pasted text #1 +N lines]."
+note "    Ctrl+G lo muestra completo para revisar la redacción. NO envía: luego Enter."
+note "    Más directo: Ctrl+G ANTES de dictar, así Wispr pega en el editor."
+note "Referencia completa en el vault: dev-tools/keybindings/claude-code.md"
+
 section "NOTAS"
 note "copy_on_select=clipboard — seleccionar con mouse ya copia (no hace falta Cmd+C)"
 note "Sequential keymaps (\`>\`): solté la primera, presiono la segunda."

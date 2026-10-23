@@ -47,6 +47,7 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 | **fzf** | Búsqueda fuzzy + fd, bat, ripgrep | ✅ |
 | **Neovim** | LazyVim con LSP para TS, Go, Python, Rust | ✅ |
 | **Apps** | Apps de escritorio via brew cask (selección interactiva) | ✅ |
+| **Claude Code status line** | Status line de dos líneas + registro en `settings.json` | ✅ |
 
 ### Ejecutar un módulo específico
 
@@ -55,6 +56,7 @@ El instalador detecta tu OS, muestra un menú interactivo y te guía paso a paso
 ./install.sh zsh        # Solo Zsh
 ./install.sh git        # Solo Git
 ./install.sh fzf        # Solo fzf
+./install.sh claude_statusline  # Solo el status line de Claude Code
 ```
 
 ## Estructura
@@ -69,7 +71,12 @@ dotfiles/
 │       ├── ghostty.sh            # Módulo Ghostty
 │       ├── zsh.sh                # Módulo Zsh
 │       ├── git.sh                # Módulo Git
-│       └── fzf.sh                # Módulo fzf
+│       ├── fzf.sh                # Módulo fzf
+│       └── claude_statusline.sh  # Módulo status line de Claude Code
+├── claude/                       # Paquete Stow → ~/.claude/
+│   └── .claude/
+│       ├── statusline-command.sh       # Status line
+│       └── statusline-link-project.sh  # Enlaza con el status line de un proyecto
 ├── ghostty/                      # Paquete Stow → ~/.config/ghostty/
 │   └── .config/ghostty/config
 ├── zsh/                          # Paquete Stow → ~/.zshrc, ~/.zshenv, etc.
@@ -214,6 +221,43 @@ tmux ls                     # o: tls
 # Cerrar sesión terminada
 tmux kill-session -t nombre # o: tk nombre
 ```
+
+### Claude Code — Status line
+
+Dos grupos: arriba, qué sesión es; abajo, cómo va. Cada segmento aparece solo si
+Claude Code manda el dato. En ventanas anchas cada grupo ocupa una línea; en splits o
+pantallas chicas se parte solo según `$COLUMNS` (lo más consultado queda arriba).
+
+```
+ nombre-sesión │ 󰉋 carpeta │ 󰘬 rama !1+2 ⎇ worktree ← main │  agente │  #12 ✓
+󰚩 Opus · high │ 󰍛 █████░░░ 63% 634k/1M │ 󰔟 5h 72% ↻1h19m │ 󰸗 7d 31% ↻3d11h │  caché 11m │ +156 −23 │  42m │ $3.14
+```
+
+| Segmento | Qué indica |
+|---|---|
+| Sesión | Nombre de `/rename` o `--name` (o el título generado) |
+| Git | `!` modificados, `+` staged, `?` untracked, `✘` borrados, `»` renombrados, `=` conflictos, `⇡⇣` ahead/behind |
+| `⎇ worktree ← rama` | Sesión de worktree de Claude Code y la rama de origen |
+| PR | PR abierto de la rama (clicable): `✓` aprobado, `✗` cambios pedidos, `•` pendiente |
+| `↻` | Tiempo hasta que se reinicia el rate limit |
+| Caché | Minutos que le quedan al prompt cache; `fría` = el próximo mensaje re-procesa todo el contexto |
+| `$` | Costo estimado a precio de lista (con Pro/Max no es lo que pagás) |
+
+`settings.json` no se gestiona con Stow (tiene config personal por máquina); el módulo
+solo escribe la clave `statusLine`, con `refreshInterval: 10` para que se refresque
+mientras la sesión espera subagentes. El estado de git se cachea 5 s por sesión.
+
+#### Repos con su propio status line (ej. AI-DLC)
+
+Claude Code ejecuta un solo `statusLine`, y el del proyecto le gana al de usuario. Para
+ver los dos, corré dentro del repo:
+
+```bash
+bash ~/.claude/statusline-link-project.sh
+```
+
+Instalación en una PC nueva, AI-DLC en varios repos y solución de problemas:
+[`docs/setup-claude-statusline.md`](docs/setup-claude-statusline.md).
 
 ### Zsh — Aliases generales
 

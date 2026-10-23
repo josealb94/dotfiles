@@ -74,6 +74,7 @@ declare_modules() {
         # -- IA --------------------------------------------------------------
         "claude|Claude (desktop)|ready|macos|on|cask|IA"
         "CUSTOM_claude_code|Claude Code (CLI)|ready|macos|on|cask|IA"
+        "claude_statusline|Claude Code status line|ready|both|on|module|IA"
         "chatgpt|ChatGPT|ready|macos|off|cask|IA"
         "ollama-app|Ollama (app)|ready|macos|off|cask|IA"
         "opencode-desktop|OpenCode (desktop)|ready|macos|off|cask|IA"
